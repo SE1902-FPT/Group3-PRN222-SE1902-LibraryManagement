@@ -1,10 +1,265 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Thư viện Số - Trang chủ";
+    Layout = null; // We'll use the provided standalone template as it has its own header/footer and Tailwind CSS setup
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-4 md:px-10 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-primary p-2 rounded-lg text-white">
+                    <span class="material-symbols-outlined block">auto_stories</span>
+                </div>
+                <h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Thư viện Số</h2>
+            </div>
+            <div class="flex flex-1 justify-end items-center gap-4 md:gap-8">
+                <label class="hidden md:flex items-center relative w-full max-w-xs">
+                    <span class="material-symbols-outlined absolute left-3 text-slate-400">search</span>
+                    <input class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary/50 transition-all" placeholder="Tìm kiếm sách, tác giả..." type="text" />
+                </label>
+                <div class="relative group" id="notification-wrapper">
+                    <button id="notification-btn" class="flex items-center justify-center rounded-xl size-10 bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 transition-colors text-slate-700 dark:text-slate-300">
+                        <span class="material-symbols-outlined">notifications</span>
+                        @if (Model.Notifications.Any(n => n.IsRead == false))
+                        {
+                            <span class="absolute top-2 right-2 size-2 bg-primary rounded-full border-2 border-white dark:border-background-dark"></span>
+                        }
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <div id="notification-dropdown" class="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 hidden transition-all duration-300 z-50">
+                        <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                            <span class="font-bold">Thông báo mới</span>
+                            <span class="text-xs text-primary cursor-pointer">Đánh dấu đã đọc</span>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            @if (Model.Notifications.Any())
+                            {
+                                foreach (var notif in Model.Notifications)
+                                {
+                                    <div class="p-3 border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                        <p class="text-sm font-medium">@notif.Message</p>
+                                        <p class="text-xs text-slate-500 mt-1">@notif.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="p-4 text-center text-sm text-slate-500">
+                                    Không có thông báo mới.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                    <div class="hidden sm:block text-right">
+                        <p class="text-sm font-bold">@Model.CurrentUser?.FullName</p>
+                        <p class="text-xs text-slate-500">Lớp @Model.UserClassName</p>
+                    </div>
+                    <div class="size-10 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center overflow-hidden">
+                        <img alt="User Profile" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=@Model.CurrentUser?.FullName&background=ec5b13&color=fff" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 md:px-10 py-8">
+        <!-- Hero Section -->
+        <section class="relative rounded-xl overflow-hidden mb-12 min-h-[300px] flex items-center">
+            <div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-background-dark/40 to-transparent z-10"></div>
+            <img alt="Library Interior" class="absolute inset-0 w-full h-full object-cover" src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=2000" />
+            <div class="relative z-20 p-8 md:p-16 max-w-2xl">
+                <span class="inline-block px-3 py-1 rounded-full bg-primary text-white text-xs font-bold mb-4 uppercase tracking-widest">Chào mừng trở lại!</span>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">Chào, @Model.CurrentUser?.FullName</h1>
+                <p class="text-slate-200 text-lg mb-8">Hôm nay bạn muốn khám phá điều gì mới? Chúng mình có hơn 5.000 đầu sách đang chờ bạn.</p>
+                <div class="flex gap-4">
+                    <button class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-xl transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined">explore</span> Khám phá ngay
+                    </button>
+                    <button class="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white font-bold py-3 px-8 rounded-xl transition-all">
+                        Tủ sách của tôi
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Teacher Recommendations -->
+        <section class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">school</span>
+                        Đề xuất từ Thầy Cô cho lớp @Model.UserClassName
+                    </h2>
+                    <p class="text-slate-500 mt-1">Dựa trên chương trình học tuần này của bạn</p>
+                </div>
+                <button class="text-primary font-semibold flex items-center gap-1 hover:underline">
+                    Xem tất cả <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                @foreach (var rec in Model.Recommendations)
+                {
+                    <div class="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-700">
+                        <div class="relative h-64 overflow-hidden">
+                            <img alt="Book Cover" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1544648151-0738d38e67f7?auto=format&fit=crop&q=80&w=600" />
+                            <div class="absolute top-2 right-2 bg-primary/90 text-white text-[10px] font-bold px-2 py-1 rounded-full">RECOMMENDED</div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg line-clamp-1">@rec.Book?.Title</h3>
+                            <p class="text-slate-500 text-sm mb-4 italic">Teacher @rec.Teacher?.FullName đề xuất</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded-md">@rec.Book?.Category?.CategoryName</span>
+                                <a href="/Books/Details?id=@rec.BookId" class="text-primary text-sm font-bold flex items-center gap-1">
+                                    Xem chi tiết <span class="material-symbols-outlined text-sm">open_in_new</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+        <!-- Categories & Browse -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">Khám phá theo danh mục</h2>
+            <div class="flex flex-wrap gap-4 overflow-x-auto hide-scrollbar pb-4">
+                <button class="px-6 py-3 rounded-xl bg-primary text-white font-bold whitespace-nowrap shadow-lg shadow-primary/20">Tất cả</button>
+                @foreach (var cat in Model.Categories)
+                {
+                    <button class="px-6 py-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-primary/10 transition-colors font-semibold whitespace-nowrap border border-slate-100 dark:border-slate-700">@cat.CategoryName</button>
+                }
+            </div>
+            <!-- Featured Books Section -->
+            <div class="mt-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">Mới cập nhật</h3>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                    @foreach (var book in Model.FeaturedBooks)
+                    {
+                        <div class="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                            <div class="aspect-[3/4] relative overflow-hidden">
+                                <img alt="@book.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://images.unsplash.com/photo-1543004629-142a2ccc5ef6?auto=format&fit=crop&q=80&w=600" />
+                            </div>
+                            <div class="p-3">
+                                <h4 class="font-bold text-sm line-clamp-1">@book.Title</h4>
+                                <p class="text-slate-500 text-xs mb-3">@book.Author</p>
+                                <a href="/Books/Details?id=@book.BookId" class="block w-full text-center py-2 bg-slate-50 dark:bg-slate-700 hover:bg-primary hover:text-white transition-colors text-primary text-xs font-bold rounded-lg">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+        <!-- Stats Section (Engagement) -->
+        <section class="bg-primary/5 rounded-2xl p-8 border border-primary/10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="text-center md:text-left">
+                <h2 class="text-2xl font-bold mb-2">Học tập tích cực</h2>
+                <p class="text-slate-600 dark:text-slate-400">Chào mừng bạn quay trở lại thư viện số của trường!</p>
+            </div>
+            <div class="flex gap-10">
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-primary">@Model.CurrentUser?.BorrowRecordStudents.Count</p>
+                    <p class="text-xs font-medium uppercase text-slate-500">Sách đã mượn</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-primary">@Model.Recommendations.Count</p>
+                    <p class="text-xs font-medium uppercase text-slate-500">Đề xuất mới</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="mt-20 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-background-dark py-12">
+        <div class="max-w-7xl mx-auto px-4 md:px-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-primary p-2 rounded-lg text-white">
+                        <span class="material-symbols-outlined block">auto_stories</span>
+                    </div>
+                    <h2 class="text-xl font-bold tracking-tight">Thư viện Trường Trung Học</h2>
+                </div>
+                <p class="text-slate-500 max-w-sm mb-6">Nơi khơi nguồn tri thức và thắp sáng những ước mơ cho thế hệ tương lai.</p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">Hỗ trợ</h4>
+                <ul class="space-y-2 text-slate-500">
+                    <li><a class="hover:text-primary transition-colors" href="#">Hướng dẫn mượn sách</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Quy định thư viện</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Câu hỏi thường gặp</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">Liên kết</h4>
+                <ul class="space-y-2 text-slate-500">
+                    <li><a class="hover:text-primary transition-colors" href="/">Trang chủ</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Kệ sách cá nhân</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 md:px-10 mt-12 pt-8 border-t border-slate-100 dark:border-slate-800 text-center text-slate-400 text-sm">
+            &copy; @DateTime.Now.Year Thư viện Trường. Phát triển bởi Đội ngũ Công nghệ thông tin.
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const bell = document.getElementById('notification-btn');
+            const dropdown = document.getElementById('notification-dropdown');
+
+            bell.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!bell.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

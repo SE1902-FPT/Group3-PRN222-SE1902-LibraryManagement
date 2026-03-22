@@ -42,15 +42,13 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                     .Take(5)
                     .ToListAsync();
 
-                if (userClass != null)
-                {
-                    Recommendations = await _context.TeacherRecommendations
-                        .Include(r => r.Book)
-                        .Include(r => r.Teacher)
-                        .Where(r => _context.Classes.Where(c => c.TeacherId == r.TeacherId).Select(c => c.ClassId).Contains(userClass.ClassId))
-                        .OrderByDescending(r => r.CreatedAt)
-                        .ToListAsync();
-                }
+                Recommendations = await _context.TeacherRecommendations
+                    .Include(r => r.Book)
+                        .ThenInclude(b => b!.BookCopies)
+                    .Include(r => r.Teacher)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .Take(2)
+                    .ToListAsync();
             }
 
             Categories = await _context.Categories.ToListAsync();

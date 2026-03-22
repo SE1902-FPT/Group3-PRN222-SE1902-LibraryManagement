@@ -1,0 +1,135 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.TeacherRecommendations.IndexModel
+@{
+    ViewData["Title"] = "Sách được giáo viên đề xuất";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sunny-yellow': '#FFD93D',
+                        'soft-orange': '#FF8400',
+                        'fresh-green': '#6BCB77',
+                        'soft-blue': '#4D96FF',
+                    },
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl-friendly': '24px',
+                        '2xl-friendly': '32px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFDF5;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="bg-sunny-yellow p-2 rounded-xl-friendly">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </div>
+                <span class="font-bold text-xl tracking-tight hidden md:block">Thư Viện Nhí</span>
+            </div>
+            <a href="/" class="flex items-center gap-2 text-gray-600 hover:text-soft-orange transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span class="font-medium">Quay lại</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Sách được giáo viên đề xuất</h1>
+            <p class="text-gray-600">Những cuốn sách hay được thầy cô giáo đề xuất dành cho các em học sinh</p>
+        </div>
+
+        @if (Model.TeacherRecommendations.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var rec in Model.TeacherRecommendations)
+                {
+                    var book = rec.Book;
+                    var availableCopies = book?.BookCopies?.Count(c => c.Status == "Available") ?? 0;
+                    <div class="bg-white rounded-2xl-friendly shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                        <div class="aspect-[2/3] bg-gray-200 relative">
+                            <img alt="@(book?.Title ?? "Book cover")" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1544648151-0738d38e67f7?auto=format&fit=crop&q=80&w=400" />
+                            <div class="absolute top-3 right-3 bg-fresh-green text-white text-xs font-bold px-3 py-1 rounded-full">
+                                Đề xuất
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h2 class="font-bold text-lg mb-2 line-clamp-2">@book?.Title</h2>
+                            <p class="text-gray-600 text-sm mb-3">@book?.Author</p>
+                            
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-gray-500 text-sm">Thể loại:</span>
+                                <span class="text-sm font-medium">@book?.Category?.CategoryName</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-gray-500 text-sm">Có sẵn:</span>
+                                <span class="text-sm font-bold @(availableCopies > 0 ? "text-fresh-green" : "text-red-500")">
+                                    @availableCopies / @book?.BookCopies?.Count
+                                </span>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(rec.Note))
+                            {
+                                <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-3 mb-4">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <div class="w-6 h-6 bg-soft-orange rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                            @(rec.Teacher?.FullName?.FirstOrDefault() ?? 'T')
+                                        </div>
+                                        <span class="font-semibold text-sm">@rec.Teacher?.FullName</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm line-clamp-2">@rec.Note</p>
+                                </div>
+                            }
+
+                            <a href="/Books/Details?id=@book?.BookId" class="block w-full text-center px-4 py-2 bg-soft-blue hover:bg-blue-500 text-white font-bold rounded-xl-friendly transition-colors">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-16">
+                <div class="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                    <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-700 mb-2">Chưa có đề xuất nào</h2>
+                <p class="text-gray-500">Hiện tại chưa có sách nào được giáo viên đề xuất</p>
+            </div>
+        }
+    </main>
+</body>
+</html>

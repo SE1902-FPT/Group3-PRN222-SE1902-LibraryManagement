@@ -63,6 +63,16 @@
     </nav>
 
     <main class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Thông báo kết quả -->
+        @if (TempData["Message"] != null)
+        {
+            var isSuccess = TempData["MessageType"]?.ToString() == "success";
+            <div class="mb-6 flex items-start gap-3 px-5 py-4 rounded-2xl-friendly border
+                        @(isSuccess ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800")">
+                <p class="font-medium">@TempData["Message"]</p>
+            </div>
+        }
+
         <div class="bg-white rounded-2xl-friendly shadow-xl overflow-hidden">
             <div class="md:flex">
                 <div class="md:w-1/3 bg-gray-100 p-8 flex items-center justify-center">
@@ -137,10 +147,23 @@
                     }
 
                     <div class="flex gap-4">
-                        @if (Model.AvailableCopies > 0)
+                        @if (Model.IsRequested)
                         {
-                            <button class="px-8 py-3 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly transition-all shadow-lg">
+                            <button class="px-8 py-3 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly cursor-not-allowed border border-gray-300 shadow-sm" disabled>
+                                Đã đăng ký
+                            </button>
+                        }
+                        else if (Model.AvailableCopies > 0 && Model.PendingCount < 5)
+                        {
+                            var firstAvailable = Model.Book.BookCopies.FirstOrDefault(c => c.Status == "Available");
+                            <button onclick="openBorrowModal(@firstAvailable?.CopyId, '@Html.Raw(Model.Book.Title.Replace("'", "\\'"))')" class="px-8 py-3 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly transition-all shadow-lg">
                                 Đăng ký mượn
+                            </button>
+                        }
+                        else if (Model.PendingCount >= 5)
+                        {
+                            <button class="px-8 py-3 bg-gray-300 text-gray-600 font-bold rounded-xl-friendly cursor-not-allowed" disabled>
+                                Đã đủ 5 sách
                             </button>
                         }
                         else
@@ -149,13 +172,113 @@
                                 Hết sách
                             </button>
                         }
-                        <button class="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl-friendly transition-colors">
-                            Yêu thích
-                        </button>
+
+                        <form method="post" asp-page-handler="ToggleFavorite">
+                            <input type="hidden" name="bookId" value="@Model.Book.BookId" />
+                            <button type="submit" class="px-6 py-3 @(Model.IsFavorite ? "bg-red-50 text-red-500 border border-red-200" : "bg-gray-100 hover:bg-gray-200 text-gray-700") font-bold rounded-xl-friendly transition-colors flex items-center gap-2">
+                                <svg class="h-5 w-5 @(Model.IsFavorite ? "fill-current" : "")" fill="@(Model.IsFavorite ? "currentColor" : "none")" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                @(Model.IsFavorite ? "Đã yêu thích" : "Yêu thích")
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Borrow Request Modal -->
+    <div id="borrowModal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeBorrowModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white rounded-2xl-friendly shadow-xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-xl font-bold text-gray-900">Đăng ký mượn sách</h3>
+                    <button onclick="closeBorrowModal()" class="text-gray-400 hover:text-red-500 transition-colors">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <form method="post" asp-page-handler="Borrow">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="copyId" id="modalCopyId" />
+                    <input type="hidden" name="bookId" value="@Model.Book?.BookId" />
+                    
+                    <div class="space-y-4">
+                        <!-- Book Info -->
+                        <div class="bg-sunny-yellow/10 p-4 rounded-xl-friendly">
+                            <p class="text-sm font-bold text-gray-700 mb-1">Quyển sách:</p>
+                            <p id="modalBookTitle" class="text-base font-bold text-soft-orange leading-snug"></p>
+                        </div>
+
+                        <!-- Student Info -->
+                        <div class="bg-gray-50 border border-gray-100 p-4 rounded-xl-friendly space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Người mượn:</span>
+                                <span class="text-sm font-bold text-gray-800">@Model.CurrentStudent?.FullName</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Lớp:</span>
+                                <span class="text-sm font-bold text-gray-800">@Model.StudentClassName</span>
+                            </div>
+                        </div>
+
+                        <!-- Date Selection -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Ngày dự kiến trả (Tối đa 1 tuần)</label>
+                            <input type="date" name="expectedReturnDate" id="modalReturnDate" required
+                                   class="w-full px-4 py-2.5 rounded-xl-friendly border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sunny-yellow" />
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex gap-3">
+                        <button type="button" onclick="closeBorrowModal()" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl-friendly transition-colors">
+                            Hủy
+                        </button>
+                        <button type="submit" class="flex-1 py-2.5 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly transition-colors">
+                            Xác nhận mượn
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openBorrowModal(copyId, title) {
+            document.getElementById('modalCopyId').value = copyId;
+            document.getElementById('modalBookTitle').innerText = title;
+            
+            // Set min/max dates
+            const today = new Date();
+            const minDate = today.toISOString().split('T')[0];
+            
+            const max = new Date();
+            max.setDate(today.getDate() + 7);
+            const maxDate = max.toISOString().split('T')[0];
+
+            const dateInput = document.getElementById('modalReturnDate');
+            dateInput.min = minDate;
+            dateInput.max = maxDate;
+            
+            // Default select today + 7
+            dateInput.value = maxDate;
+
+            const modal = document.getElementById('borrowModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeBorrowModal() {
+            const modal = document.getElementById('borrowModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
 </body>
 </html>

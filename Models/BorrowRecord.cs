@@ -21,6 +21,8 @@ public partial class BorrowRecord
 
     public int? ProcessedBy { get; set; }
 
+    public bool? IsNotifiedOverdue { get; set; }
+
     public virtual BookCopy? Copy { get; set; }
 
     public virtual User? ProcessedByNavigation { get; set; }

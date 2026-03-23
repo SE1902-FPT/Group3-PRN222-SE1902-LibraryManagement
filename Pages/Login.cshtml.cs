@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -22,7 +22,15 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
 
         public void OnGet()
         {
-            // Chạy khi người dùng mới vào trang Login
+            var error = Request.Query["error"].ToString();
+            if (string.Equals(error, "login_required", StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorMessage = "Bạn phải đăng nhập để tiếp tục.";
+            }
+            else if (string.Equals(error, "access_denied", StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorMessage = "Bạn không có quyền truy cập chức năng này.";
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()

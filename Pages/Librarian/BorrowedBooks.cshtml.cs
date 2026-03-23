@@ -1,10 +1,12 @@
 using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 
+[Authorize(Roles = "Librarian")]
 public class BorrowedBooksModel : PageModel
 {
     private readonly ThuVienContext _context;
@@ -30,7 +32,7 @@ public class BorrowedBooksModel : PageModel
         public string Status { get; set; } = "Borrowed";
     }
 
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync()
     {
         try
         {
@@ -58,6 +60,8 @@ public class BorrowedBooksModel : PageModel
         {
             ErrorMessage = $"Lỗi khi lấy dữ liệu: {ex.Message}";
         }
+
+        return Page();
     }
 }
 

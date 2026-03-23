@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 
+[Authorize(Roles = "Librarian")]
 public class AddBookModel : PageModel
 {
     private readonly ThuVienContext _context;
@@ -46,9 +48,10 @@ public class AddBookModel : PageModel
         public int CopiesToAdd { get; set; } = 1;
     }
 
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync()
     {
         Categories = await _context.Categories.OrderBy(c => c.CategoryName).ToListAsync();
+        return Page();
     }
 
     public async Task<IActionResult> OnPostAsync()

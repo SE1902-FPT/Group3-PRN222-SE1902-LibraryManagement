@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-﻿using Group3_SE1902_PRN222_LibraryManagement.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
-=======
 using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
->>>>>>> 99d6fafb21e2b4fc1398ba7a4dce645e419a3175
 
 namespace Group3_SE1902_PRN222_LibraryManagement
 {
@@ -17,16 +13,31 @@ namespace Group3_SE1902_PRN222_LibraryManagement
 
             // Add services to the container.
             builder.Services.AddRazorPages();
-<<<<<<< HEAD
+            builder.Services.AddAuthorization();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Login";
-        options.AccessDeniedPath = "/AccessDenied";
+        // Redirect wrong-role access back to Login (same as requirement)
+        options.AccessDeniedPath = "/Login";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = context =>
+            {
+                var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
+                context.Response.Redirect($"/Login?error=login_required&returnUrl={Uri.EscapeDataString(returnUrl)}");
+                return Task.CompletedTask;
+            },
+            OnRedirectToAccessDenied = context =>
+            {
+                var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
+                context.Response.Redirect($"/Login?error=access_denied&returnUrl={Uri.EscapeDataString(returnUrl)}");
+                return Task.CompletedTask;
+            }
+        };
     });
-=======
->>>>>>> 99d6fafb21e2b4fc1398ba7a4dce645e419a3175
 
             // Add DB Context
             builder.Services.AddDbContext<ThuVienContext>(options =>
@@ -39,10 +50,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             {
                 app.UseExceptionHandler("/Error");
             }
-<<<<<<< HEAD
-            
-=======
->>>>>>> 99d6fafb21e2b4fc1398ba7a4dce645e419a3175
             app.UseStaticFiles();
 
             app.UseRouting();

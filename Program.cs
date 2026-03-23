@@ -12,9 +12,9 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             // Add services to the container.
             builder.Services.AddRazorPages();
 
-            //Add DB Context
+            // Add DB Context
             builder.Services.AddDbContext<ThuVienContext>(options =>
-                     options.UseSqlServer(builder.Configuration.GetConnectionString("ThuvienDB")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("ThuvienDB")));
 
             var app = builder.Build();
 
@@ -27,6 +27,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement
 
             app.UseRouting();
 
+            // Lưu ý: Phải có UseAuthentication TRƯỚC UseAuthorization
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapRazorPages();

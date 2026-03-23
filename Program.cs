@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 ﻿using Group3_SE1902_PRN222_LibraryManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+=======
+using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Microsoft.EntityFrameworkCore;
+>>>>>>> 99d6fafb21e2b4fc1398ba7a4dce645e419a3175
 
 namespace Group3_SE1902_PRN222_LibraryManagement
 {
@@ -12,6 +17,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+<<<<<<< HEAD
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -19,6 +25,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement
         options.AccessDeniedPath = "/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     });
+=======
+>>>>>>> 99d6fafb21e2b4fc1398ba7a4dce645e419a3175
 
             //Add DB Context
             builder.Services.AddDbContext<ThuVienContext>(options =>
@@ -31,7 +39,10 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             {
                 app.UseExceptionHandler("/Error");
             }
+<<<<<<< HEAD
             
+=======
+>>>>>>> 99d6fafb21e2b4fc1398ba7a4dce645e419a3175
             app.UseStaticFiles();
 
             app.UseRouting();

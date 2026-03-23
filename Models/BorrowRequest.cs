@@ -17,6 +17,8 @@ public partial class BorrowRequest
 
     public int? ApprovedBy { get; set; }
 
+    public DateTime? ExpectedReturnDate { get; set; }
+
     public virtual User? ApprovedByNavigation { get; set; }
 
     public virtual BookCopy? Copy { get; set; }

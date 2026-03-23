@@ -80,7 +80,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                                     return RedirectToPage("/AdminDashboard"); // Chuyển đến trang của Quản trị viên
 
                                 case "Librarian":
-                                    return RedirectToPage("/LibrarianDashboard"); // Chuyển đến trang của Thủ thư
+                                    return RedirectToPage("/Librarian/Libralian_Dashboard"); // Chuyển đến trang của Thủ thư
 
                                 case "Teacher":
                                     return RedirectToPage("/TeacherDashboard"); // Chuyển đến trang của Giáo viên

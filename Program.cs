@@ -28,9 +28,9 @@ namespace Group3_SE1902_PRN222_LibraryManagement
 =======
 >>>>>>> 99d6fafb21e2b4fc1398ba7a4dce645e419a3175
 
-            //Add DB Context
+            // Add DB Context
             builder.Services.AddDbContext<ThuVienContext>(options =>
-                     options.UseSqlServer(builder.Configuration.GetConnectionString("ThuvienDB")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("ThuvienDB")));
 
             var app = builder.Build();
 
@@ -47,6 +47,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement
 
             app.UseRouting();
 
+            // Lưu ý: Phải có UseAuthentication TRƯỚC UseAuthorization
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapRazorPages();

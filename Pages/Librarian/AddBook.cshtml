@@ -1,0 +1,71 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian.AddBookModel
+
+@{
+    ViewData["Title"] = "Thêm sách";
+    Layout = "_LibrarianLayout";
+}
+
+<div class="mt-4">
+    <h1 class="h3 mb-3">Thêm sách</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @Model.SuccessMessage
+        </div>
+    }
+
+    <form method="post" class="card p-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Tên sách *</label>
+                <input class="form-control" name="input.Title" required maxlength="200" value="@Model.Input.Title" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Tác giả</label>
+                <input class="form-control" name="input.Author" maxlength="100" value="@Model.Input.Author" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Thể loại</label>
+                <select class="form-select" name="input.CategoryId">
+                    <option value="">(Không)</option>
+                    @foreach (var c in Model.Categories)
+                    {
+                        <option value="@c.CategoryId" selected="@(Model.Input.CategoryId == c.CategoryId ? "selected" : null)">@c.CategoryName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Nhà xuất bản</label>
+                <input class="form-control" name="input.Publisher" maxlength="100" value="@Model.Input.Publisher" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Năm xuất bản</label>
+                <input class="form-control" type="number" name="input.PublishYear" value="@Model.Input.PublishYear" />
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label">Mô tả</label>
+                <textarea class="form-control" name="input.Description" rows="3">@Model.Input.Description</textarea>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Số bản thêm *</label>
+                <input class="form-control" type="number" name="input.CopiesToAdd" min="1" required value="@Model.Input.CopiesToAdd" />
+            </div>
+
+            <div class="col-md-6 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Tạo sách</button>
+            </div>
+        </div>
+    </form>
+</div>
+

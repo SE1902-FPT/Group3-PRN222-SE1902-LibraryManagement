@@ -1,0 +1,66 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian.BorrowedBooksModel
+
+@{
+    ViewData["Title"] = "Danh sách đang được mượn";
+    Layout = "_LibrarianLayout";
+}
+
+<div class="mt-4">
+    <h1 class="h3 mb-3">Danh sách đang được mượn</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Mã mượn</th>
+                    <th>Học sinh</th>
+                    <th>Sách</th>
+                    <th>Bản</th>
+                    <th>Ngày mượn</th>
+                    <th>Hạn trả</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.CurrentBorrowRecords.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Chưa có ai đang mượn.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var b in Model.CurrentBorrowRecords)
+                    {
+                        <tr>
+                            <td>@b.BorrowId</td>
+                            <td>@b.StudentName</td>
+                            <td>
+                                <div class="fw-semibold">@b.BookTitle</div>
+                                @if (!string.IsNullOrWhiteSpace(b.CategoryName))
+                                {
+                                    <div class="text-muted small">@b.CategoryName</div>
+                                }
+                            </td>
+                            <td>@b.CopyId</td>
+                            <td>@(b.BorrowDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>@(b.DueDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>
+                                <span class="badge bg-primary">@b.Status</span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

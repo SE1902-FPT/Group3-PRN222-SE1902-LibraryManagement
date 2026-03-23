@@ -1,0 +1,89 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian.BorrowRequestsModel
+
+@{
+    ViewData["Title"] = "Duyệt yêu cầu mượn sách";
+    Layout = "_LibrarianLayout";
+}
+
+<div class="mt-4">
+    <h1 class="h3 mb-3">Duyệt yêu cầu mượn sách</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        var alertClass = Model.StatusType switch
+        {
+            "success" => "alert-success",
+            "warning" => "alert-warning",
+            _ => "alert-danger"
+        };
+
+        <div class="alert @alertClass" role="alert">
+            @Model.StatusMessage
+        </div>
+    }
+
+    <div class="alert alert-info d-flex align-items-center gap-2" role="alert">
+        Thủ thư hiện tại: <strong>@Model.LibrarianName</strong> (ID: <strong>@Model.LibrarianId</strong>)
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Ngày yêu cầu</th>
+                    <th>Học sinh</th>
+                    <th>Sách</th>
+                    <th>Mã bản</th>
+                    <th>Ngày trả dự kiến</th>
+                    <th>Trạng thái</th>
+                    <th style="width: 220px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.PendingRequests.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            Không có yêu cầu mượn nào đang chờ duyệt.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var request in Model.PendingRequests)
+                    {
+                        <tr>
+                            <td>@(request.RequestDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                            <td>@request.StudentName</td>
+                            <td>
+                                <div class="fw-semibold">@request.BookTitle</div>
+                                @if (!string.IsNullOrWhiteSpace(request.CategoryName))
+                                {
+                                    <div class="text-muted small">@request.CategoryName</div>
+                                }
+                            </td>
+                            <td>@request.CopyId</td>
+                            <td>@(request.ExpectedReturnDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>
+                                <span class="badge bg-warning text-dark">@request.RequestStatus</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <form method="post" asp-page-handler="Approve" class="m-0">
+                                        <input type="hidden" name="requestId" value="@request.RequestId" />
+                                        <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
+                                    </form>
+                                    <form method="post" asp-page-handler="Reject" class="m-0">
+                                        <input type="hidden" name="requestId" value="@request.RequestId" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Từ chối</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

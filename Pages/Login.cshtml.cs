@@ -1,21 +1,30 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using System.Security.Claims;
+using Group3_SE1902_PRN222_LibraryManagement.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Data.SqlClient;
-using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
-namespace Group3_SE1902_PRN222_LibraryManagement.Pages
+namespace Group3_SE1902_PRN222_LibraryManagement.Pages;
+
+public class LoginModel : PageModel
 {
-    public class LoginModel : PageModel
+    private readonly ThuVienContext _context;
+
+    public LoginModel(ThuVienContext context)
     {
-        [BindProperty]
-        public string Email { get; set; }
+        _context = context;
+    }
 
-        [BindProperty]
-        public string Password { get; set; }
+    [BindProperty]
+    public string Email { get; set; } = string.Empty;
 
-        public string ErrorMessage { get; set; }
+    [BindProperty]
+    public string Password { get; set; } = string.Empty;
+
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
 
         // Chuỗi kết nối Database của bạn
         private readonly string connectionString = @"Server=QUYNH_CHI\KTEAM;database=Thu_vien;uid=sa;pwd=123456;TrustServerCertificate=True;";
@@ -25,100 +34,83 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
             // Chạy khi người dùng mới vào trang Login
         }
 
-        public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid) return Page();
+            return Page();
+        }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string query = "SELECT UserID, FullName, RoleID, Status FROM [Thu_vien].[dbo].[Users] WHERE Email = @Email AND PasswordHash = @Password";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Email", Email);
-                    cmd.Parameters.AddWithValue("@Password", Password);
+        var user = await _context.Users
+            .AsNoTracking()
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Email == Email && u.PasswordHash == Password);
 
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            string status = reader["Status"].ToString();
-                            if (status != "Active")
-                            {
-                                ErrorMessage = "Tài khoản của bạn đã bị khóa!";
-                                return Page();
-                            }
+        if (user == null)
+        {
+            ErrorMessage = "Email hoặc mật khẩu không đúng.";
+            return Page();
+        }
 
-                            string fullName = reader["FullName"].ToString();
-                            int roleId = Convert.ToInt32(reader["RoleID"]);
+        if (!string.Equals(user.Status, "Active", StringComparison.OrdinalIgnoreCase))
+        {
+            ErrorMessage = "Tài khoản của bạn đã bị khóa.";
+            return Page();
+        }
 
-                            // Chuyển RoleID thành Tên Quyền để dễ quản lý trong ASP.NET
-                            string roleName = GetRoleName(roleId);
+        var roleName = user.Role?.RoleName ?? GetRoleName(user.RoleId);
 
-                            // 1. Tạo danh sách các thông tin (Claims) của người dùng
-                            var claims = new List<Claim>
-                            {
-                                new Claim(ClaimTypes.Name, fullName),
-                                new Claim(ClaimTypes.Email, Email),
-                                new Claim(ClaimTypes.Role, roleName) // Đây là phần quan trọng nhất để phân quyền
-                            };
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new("UserId", user.UserId.ToString()),
+            new(ClaimTypes.Name, user.FullName),
+            new(ClaimTypes.Email, user.Email ?? string.Empty),
+            new(ClaimTypes.Role, roleName)
+        };
 
-                            // 2. Tạo Identity và Principal
-                            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                            var authProperties = new AuthenticationProperties { IsPersistent = true }; // Ghi nhớ đăng nhập
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var authProperties = new AuthenticationProperties { IsPersistent = true };
 
-                            // 3. Đăng nhập (Lưu Cookie)
-                            await HttpContext.SignInAsync(
-                                CookieAuthenticationDefaults.AuthenticationScheme,
-                                new ClaimsPrincipal(claimsIdentity),
-                                authProperties);
+        HttpContext.Session.SetInt32("UserId", user.UserId);
+        HttpContext.Session.SetString("Role", roleName);
 
-                            // 4. Điều hướng sau khi đăng nhập thành công
-                            switch (roleName)
-                            {
-                                case "Admin":
-                                    return RedirectToPage("/AdminDashboard"); // Chuyển đến trang của Quản trị viên
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(claimsIdentity),
+            authProperties);
+
+        if (!string.IsNullOrWhiteSpace(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+        {
+            return LocalRedirect(ReturnUrl);
+        }
 
                                 case "Librarian":
                                     return RedirectToPage("/LibrarianDashboard"); // Chuyển đến trang của Thủ thư
 
-                                case "Teacher":
-                                    return RedirectToPage("/TeacherDashboard"); // Chuyển đến trang của Giáo viên
-
-                                case "Parent":
-                                    return RedirectToPage("/ParentDashboard"); // Chuyển đến trang của Phụ huynh
-
-                                case "Student":
-                                    return RedirectToPage("/StudentDashboard"); // Chuyển đến trang của Học sinh
-
-                                default:
-                                    // Đề phòng trường hợp lỗi hoặc có quyền lạ chưa được định nghĩa
-                                    return RedirectToPage("/Index");
-                            }
-                        }
-                        else
-                        {
-                            ErrorMessage = "Email hoặc mật khẩu không đúng!";
-                            return Page();
-                        }
-                    }
-                }
-            }
-        }
-
-        // Hàm phụ trợ chuyển RoleID thành chuỗi
-        private string GetRoleName(int roleId)
+    private IActionResult RedirectByRole(string? roleName)
+    {
+        return roleName switch
         {
-            return roleId switch
-            {
-                5 => "Admin",
-                4 => "Librarian", // Thủ thư
-                3 => "Teacher",
-                1 => "Student",
-                2 => "Parent",
-                _ => "User"
-            };
-        }
+            "Admin" => RedirectToPage("/AdminDashboard"),
+            "Librarian" => RedirectToPage("/Librarian/Libralian_Dashboard"),
+            "Teacher" => RedirectToPage("/TeacherDashboard"),
+            "Parent" => RedirectToPage("/Parent/Dashboard"),
+            "Student" => RedirectToPage("/StudentDashboard"),
+            _ => RedirectToPage("/Index")
+        };
+    }
+
+    private static string GetRoleName(int roleId)
+    {
+        return roleId switch
+        {
+            5 => "Admin",
+            4 => "Librarian",
+            3 => "Teacher",
+            2 => "Parent",
+            1 => "Student",
+            _ => "User"
+        };
     }
 }
-

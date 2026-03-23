@@ -1,28 +1,1 @@
-﻿@page
-@model Group3_SE1902_PRN222_LibraryManagement.Pages.LoginModel
-@{
-    ViewData["Title"] = "Đăng nhập";
-}
-
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <h3 class="text-center">Đăng nhập hệ thống</h3>
-
-        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-        {
-            <div class="alert alert-danger">@Model.ErrorMessage</div>
-        }
-
-        <form method="post">
-            <div class="mb-3">
-                <label>Email:</label>
-                <input type="email" asp-for="Email" class="form-control" required />
-            </div>
-            <div class="mb-3">
-                <label>Mật khẩu:</label>
-                <input type="password" asp-for="Password" class="form-control" required />
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
-        </form>
-    </div>
-</div>
+﻿@page @model Group3_SE1902_PRN222_LibraryManagement.Pages.LoginModel @{     ViewData["Title"] = "Đăng nhập"; }  <div class="row justify-content-center mt-5">     <div class="col-md-4">         <h3 class="text-center">Đăng nhập hệ thống</h3>          @if (!string.IsNullOrEmpty(Model.ErrorMessage))         {             <div class="alert alert-danger">@Model.ErrorMessage</div>         }          <form method="post">             <input type="hidden" asp-for="ReturnUrl" />             <div class="mb-3">                 <label>Email:</label>                 <input type="email" asp-for="Email" class="form-control" required />             </div>             <div class="mb-3">                 <label>Mật khẩu:</label>                 <input type="password" asp-for="Password" class="form-control" required />             </div>             <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>         </form>     </div> </div> 

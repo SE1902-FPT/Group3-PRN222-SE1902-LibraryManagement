@@ -1,0 +1,82 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian.BorrowedBooksModel
+
+@{
+    ViewData["Title"] = "Danh sách đang mượn";
+    Layout = "_LibrarianLayout";
+}
+
+<div class="mt-4">
+    <h1 class="h3 mb-3">Danh sách sách đang mượn</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        var alertClass = Model.StatusType switch
+        {
+            "success" => "alert-success",
+            "warning" => "alert-warning",
+            _ => "alert-danger"
+        };
+
+        <div class="alert @alertClass" role="alert">
+            @Model.StatusMessage
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Mã mượn</th>
+                    <th>Học sinh</th>
+                    <th>Sách</th>
+                    <th>Bản</th>
+                    <th>Ngày mượn</th>
+                    <th>Hạn trả</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.CurrentBorrowRecords.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">Chưa có ai đang mượn sách.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var record in Model.CurrentBorrowRecords)
+                    {
+                        <tr>
+                            <td>@record.BorrowId</td>
+                            <td>@record.StudentName</td>
+                            <td>
+                                <div class="fw-semibold">@record.BookTitle</div>
+                                @if (!string.IsNullOrWhiteSpace(record.CategoryName))
+                                {
+                                    <div class="text-muted small">@record.CategoryName</div>
+                                }
+                            </td>
+                            <td>@record.CopyId</td>
+                            <td>@(record.BorrowDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>@(record.DueDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>
+                                <span class="badge @record.StatusBadgeClass">@record.DisplayStatus</span>
+                            </td>
+                            <td>
+                                <form method="post" asp-page-handler="Return" class="m-0">
+                                    <input type="hidden" name="borrowId" value="@record.BorrowId" />
+                                    <button type="submit" class="btn btn-outline-success btn-sm"
+                                            onclick="return confirm('Xác nhận học sinh đã trả sách này?');">
+                                        Xác nhận trả
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

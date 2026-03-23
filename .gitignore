@@ -77,3 +77,8 @@ _ReSharper*/
 # Temporary files
 *.tmp
 *.temp
+
+# Local tooling folders
+.appdata/
+.dotnet/
+.userprofile/

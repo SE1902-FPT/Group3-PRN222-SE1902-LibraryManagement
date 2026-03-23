@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+@{
+    var parentName = ViewData["ParentName"] as string ?? "Phụ huynh";
+    var unreadCount = ViewData["UnreadNotificationCount"] is int count ? count : 0;
+    var currentPath = Context.Request.Path.Value ?? string.Empty;
+    var nameParts = parentName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials = string.Concat(nameParts.TakeLast(2).Select(part => char.ToUpperInvariant(part[0])));
+    if (string.IsNullOrWhiteSpace(initials))
+    {
+        initials = "PH";
+    }
+
+    string NavClass(string path) =>
+        currentPath.Equals(path, StringComparison.OrdinalIgnoreCase) ||
+        currentPath.StartsWith(path + "/", StringComparison.OrdinalIgnoreCase)
+            ? "bg-sunny-yellow text-gray-900 shadow-md"
+            : "text-gray-500 hover:bg-gray-100 hover:text-gray-900";
+}
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"] - Phụ huynh</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sunny-yellow': '#FFD93D',
+                        'soft-orange': '#FF8400',
+                        'fresh-green': '#6BCB77',
+                        'soft-blue': '#4D96FF',
+                    },
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl-friendly': '24px',
+                        '2xl-friendly': '32px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFDF5;
+        }
+
+        .book-card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+        }
+
+        .parent-glow {
+            box-shadow: 0 18px 45px -24px rgba(255, 132, 0, 0.35);
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col gap-4 2xl:flex-row 2xl:items-center 2xl:justify-between">
+            <div class="flex items-center justify-between gap-4">
+                <a class="flex items-center gap-3 shrink-0" asp-page="/Parent/Dashboard">
+                    <div class="bg-sunny-yellow p-2 rounded-xl-friendly">
+                        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-bold text-xl tracking-tight text-gray-900">Thư Viện Nhí</div>
+                        <div class="text-[11px] tracking-[0.35em] uppercase text-gray-400 font-semibold">Không gian phụ huynh</div>
+                    </div>
+                </a>
+
+                <a class="xl:hidden inline-flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-sm font-bold text-white shadow-lg" asp-page="/Logout">Đăng xuất</a>
+            </div>
+
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:flex-1 lg:min-w-0">
+                <div class="flex flex-wrap items-center gap-2 lg:flex-nowrap">
+                    <a class="rounded-full px-5 py-3 text-sm font-bold transition-all @NavClass("/Parent/Dashboard")" asp-page="/Parent/Dashboard">Dashboard</a>
+                    <a class="rounded-full px-5 py-3 text-sm font-bold transition-all @NavClass("/Parent/BorrowedBooks")" asp-page="/Parent/BorrowedBooks">Sách đang mượn</a>
+                    <a class="rounded-full px-5 py-3 text-sm font-bold transition-all @NavClass("/Parent/History")" asp-page="/Parent/History">Lịch sử mượn</a>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 lg:justify-end">
+                    <a class="relative inline-flex items-center gap-3 rounded-full border border-gray-100 bg-white px-5 py-3 text-sm font-bold text-gray-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md @(currentPath.StartsWith("/Parent/Notifications", StringComparison.OrdinalIgnoreCase) ? "ring-2 ring-sunny-yellow" : string.Empty)" asp-page="/Parent/Notifications">
+                        <svg class="h-6 w-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                        </svg>
+                        <span>Thông báo</span>
+                        <span class="inline-flex min-w-[2rem] items-center justify-center rounded-full bg-soft-orange px-2.5 py-1 text-xs font-bold text-white" data-unread-count>@unreadCount</span>
+                    </a>
+
+                    <div class="flex items-center gap-3 rounded-full border border-gray-100 bg-white px-3 py-2 shadow-sm">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-bold leading-none">@parentName</div>
+                            <div class="text-[11px] text-gray-500 font-medium tracking-wide">Không gian phụ huynh</div>
+                        </div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-soft-blue text-lg font-bold text-white">@initials</div>
+                    </div>
+
+                    <a class="hidden lg:inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-gray-800 hover:-translate-y-0.5" asp-page="/Logout">Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8 space-y-10">
+        @RenderBody()
+    </main>
+
+    <footer class="max-w-7xl mx-auto px-6 pb-12 mt-4">
+        <div class="bg-white border-4 border-fresh-green rounded-2xl-friendly p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
+            <div class="flex items-center gap-6">
+                <div class="w-16 h-16 bg-fresh-green/20 rounded-2xl flex items-center justify-center text-3xl">💛</div>
+                <div>
+                    <h3 class="font-bold text-xl">Theo dõi việc đọc của con mỗi ngày</h3>
+                    <p class="text-gray-500">Mọi thông báo mượn, trả và quá hạn đều được lưu lại để phụ huynh dễ dàng theo dõi.</p>
+                    <p class="mt-3 text-sm font-semibold text-soft-orange">Nhà trường cảm ơn quý phụ huynh đã luôn đồng hành cùng con.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
+                <div class="rounded-2xl bg-gray-50 px-5 py-4 text-center">
+                    <div class="text-2xl font-extrabold text-gray-900" data-unread-count>@unreadCount</div>
+                    <div class="text-xs font-semibold uppercase tracking-[0.25em] text-gray-400">Chưa đọc</div>
+                </div>
+                <a class="inline-flex items-center justify-center rounded-2xl bg-gray-900 px-6 py-4 text-sm font-bold text-white shadow-lg transition hover:bg-gray-800" asp-page="/Parent/Notifications">Mở hộp thông báo</a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="parent-notification-toast-container" class="fixed right-4 top-24 z-[60] space-y-3"></div>
+
+    <script src="~/js/parent-notifications.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,10 +1,13 @@
 using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 
+[Authorize(Roles = "Librarian")]
 public class Librarian_DashboardModel : PageModel
 {
     private readonly ThuVienContext _context;
@@ -31,55 +34,19 @@ public class Librarian_DashboardModel : PageModel
         public int TotalCount { get; set; }
     }
 
-    public async Task OnGetAsync(int? librarianId)
+    public async Task<IActionResult> OnGetAsync(int? librarianId)
     {
-        const int librarianRoleId = 4;
         const string statusAvailable = "Available";
         const string statusBorrowed = "Borrowed";
 
-        var resolved = false;
-
-        if (librarianId.HasValue)
+        var currentUser = await GetCurrentLibrarianAsync();
+        if (currentUser == null)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u =>
-                u.UserId == librarianId.Value && u.RoleId == librarianRoleId);
-
-            if (user == null)
-            {
-                ErrorMessage = "librarianId không hợp lệ (không phải Librarian).";
-                LibrarianId = null;
-                LibrarianName = null;
-            }
-            else
-            {
-                LibrarianId = user.UserId;
-                LibrarianName = user.FullName;
-                resolved = true;
-            }
-        }
-        else
-        {
-            var firstLibrarian = await _context.Users
-                .FirstOrDefaultAsync(u => u.RoleId == librarianRoleId);
-
-            if (firstLibrarian == null)
-            {
-                ErrorMessage = "Chưa có tài khoản Librarian trong database (RoleId = 4).";
-                LibrarianId = null;
-                LibrarianName = null;
-            }
-            else
-            {
-                LibrarianId = firstLibrarian.UserId;
-                LibrarianName = firstLibrarian.FullName;
-                resolved = true;
-            }
+            return RedirectToPage("/Login", new { error = "access_denied" });
         }
 
-        if (!resolved)
-        {
-            return;
-        }
+        LibrarianId = currentUser.UserId;
+        LibrarianName = currentUser.FullName;
 
         // Dashboard hiển thị nhanh tình trạng sách (top newest)
         Books = await _context.Books
@@ -98,6 +65,19 @@ public class Librarian_DashboardModel : PageModel
                 TotalCount = b.BookCopies.Count
             })
             .ToListAsync();
+
+        return Page();
+    }
+
+    private async Task<User?> GetCurrentLibrarianAsync()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return null;
+        }
+
+        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.RoleId == 4);
     }
 }
 

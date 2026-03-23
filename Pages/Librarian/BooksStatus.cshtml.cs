@@ -1,10 +1,12 @@
 using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 
+[Authorize(Roles = "Librarian")]
 public class BooksStatusModel : PageModel
 {
     private readonly ThuVienContext _context;
@@ -29,7 +31,7 @@ public class BooksStatusModel : PageModel
         public int TotalCount { get; set; }
     }
 
-    public async Task OnGetAsync(string? q)
+    public async Task<IActionResult> OnGetAsync(string? q)
     {
         try
         {
@@ -64,6 +66,8 @@ public class BooksStatusModel : PageModel
         {
             ErrorMessage = $"Lỗi khi lấy dữ liệu: {ex.Message}";
         }
+
+        return Page();
     }
 }
 

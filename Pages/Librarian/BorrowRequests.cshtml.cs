@@ -1,11 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 
+[Authorize(Roles = "Librarian")]
 public class BorrowRequestsModel : PageModel
 {
     private readonly ThuVienContext _context;
@@ -14,8 +17,6 @@ public class BorrowRequestsModel : PageModel
     {
         _context = context;
     }
-
-    private const int LibrarianRoleId = 4;
 
     public int? LibrarianId { get; set; }
     public string? LibrarianName { get; set; }
@@ -34,33 +35,17 @@ public class BorrowRequestsModel : PageModel
         public string RequestStatus { get; set; } = "Pending";
     }
 
-    private async Task<bool> ResolveLibrarianAsync(int? librarianId)
+    public async Task<IActionResult> OnGetAsync(int? librarianId)
     {
-        if (librarianId.HasValue)
+        var currentUser = await GetCurrentLibrarianAsync();
+        if (currentUser == null)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == librarianId.Value && u.RoleId == LibrarianRoleId);
-            if (user == null) return false;
-            LibrarianId = user.UserId;
-            LibrarianName = user.FullName;
-            return true;
+            return RedirectToPage("/Login", new { error = "access_denied" });
         }
 
-        var first = await _context.Users.FirstOrDefaultAsync(u => u.RoleId == LibrarianRoleId);
-        if (first == null) return false;
-        LibrarianId = first.UserId;
-        LibrarianName = first.FullName;
-        return true;
-    }
-
-    public async Task OnGetAsync(int? librarianId)
-    {
-        var ok = await ResolveLibrarianAsync(librarianId);
-        if (!ok)
-        {
-            ErrorMessage = "Không xác định được Librarian (RoleId = 4).";
-            PendingRequests.Clear();
-            return;
-        }
+        LibrarianId = currentUser.UserId;
+        LibrarianName = currentUser.FullName;
+        ErrorMessage = null;
 
         PendingRequests = await _context.BorrowRequests
             .Where(r => r.Status == "Pending")
@@ -80,18 +65,21 @@ public class BorrowRequestsModel : PageModel
                 RequestStatus = r.Status ?? "Pending"
             })
             .ToListAsync();
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostApproveAsync(int requestId, int librarianId)
     {
-        ErrorMessage = null;
-
-        var ok = await ResolveLibrarianAsync(librarianId);
-        if (!ok)
+        var currentUser = await GetCurrentLibrarianAsync();
+        if (currentUser == null)
         {
-            ErrorMessage = "librarianId không hợp lệ (không phải Librarian).";
-            return Page();
+            return RedirectToPage("/Login", new { error = "access_denied" });
         }
+
+        LibrarianId = currentUser.UserId;
+        LibrarianName = currentUser.FullName;
+        ErrorMessage = null;
 
         using var tx = await _context.Database.BeginTransactionAsync();
 
@@ -156,14 +144,15 @@ public class BorrowRequestsModel : PageModel
 
     public async Task<IActionResult> OnPostRejectAsync(int requestId, int librarianId)
     {
-        ErrorMessage = null;
-
-        var ok = await ResolveLibrarianAsync(librarianId);
-        if (!ok)
+        var currentUser = await GetCurrentLibrarianAsync();
+        if (currentUser == null)
         {
-            ErrorMessage = "librarianId không hợp lệ (không phải Librarian).";
-            return Page();
+            return RedirectToPage("/Login", new { error = "access_denied" });
         }
+
+        LibrarianId = currentUser.UserId;
+        LibrarianName = currentUser.FullName;
+        ErrorMessage = null;
 
         var request = await _context.BorrowRequests.FirstOrDefaultAsync(r => r.RequestId == requestId);
         if (request == null)
@@ -183,6 +172,17 @@ public class BorrowRequestsModel : PageModel
         await _context.SaveChangesAsync();
 
         return RedirectToPage("/Librarian/BorrowRequests", new { librarianId = LibrarianId });
+    }
+
+    private async Task<User?> GetCurrentLibrarianAsync()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return null;
+        }
+
+        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.RoleId == 4);
     }
 }
 

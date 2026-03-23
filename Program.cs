@@ -1,6 +1,7 @@
-﻿using Group3_SE1902_PRN222_LibraryManagement.Models;
-using Microsoft.EntityFrameworkCore;
+using Group3_SE1902_PRN222_LibraryManagement.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Group3_SE1902_PRN222_LibraryManagement
 {
@@ -12,12 +13,30 @@ namespace Group3_SE1902_PRN222_LibraryManagement
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddAuthorization();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Login";
-        options.AccessDeniedPath = "/AccessDenied";
+        // Redirect wrong-role access back to Login (same as requirement)
+        options.AccessDeniedPath = "/Login";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = context =>
+            {
+                var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
+                context.Response.Redirect($"/Login?error=login_required&returnUrl={Uri.EscapeDataString(returnUrl)}");
+                return Task.CompletedTask;
+            },
+            OnRedirectToAccessDenied = context =>
+            {
+                var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
+                context.Response.Redirect($"/Login?error=access_denied&returnUrl={Uri.EscapeDataString(returnUrl)}");
+                return Task.CompletedTask;
+            }
+        };
     });
 
             // Add DB Context
@@ -31,7 +50,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             {
                 app.UseExceptionHandler("/Error");
             }
-            
             app.UseStaticFiles();
 
             app.UseRouting();

@@ -1,0 +1,73 @@
+@page "/Librarian/LibrarianDashboard"
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian.Librarian_DashboardModel
+
+@{
+    ViewData["Title"] = "Librarian Dashboard";
+    Layout = "_LibrarianLayout";
+}
+
+<div class="mt-4">
+    <h1 class="h3 mb-3">Librarian</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">
+            Thủ thư hiện tại: <strong>@Model.LibrarianName</strong> 
+        </p>
+    }
+
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-primary" href="/Librarian/BorrowRequests?librarianId=@(Model.LibrarianId ?? 0)">Duyệt request mượn</a>
+        <a class="btn btn-secondary" href="/Librarian/AddBook">Thêm sách</a>
+        <a class="btn btn-info" href="/Librarian/BorrowedBooks">Danh sách đang được mượn</a>
+        <a class="btn btn-outline-dark" href="/Librarian/BooksStatus">Tình trạng sách</a>
+    </div>
+
+    <div class="mt-4">
+        <h2 class="h5 mb-3">Danh sách sách (tình trạng nhanh)</h2>
+
+        @if (Model.Books.Count == 0)
+        {
+            <div class="alert alert-secondary">Chưa có dữ liệu sách.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Tên sách</th>
+                            <th>Thể loại</th>
+                            <th>Tác giả</th>
+                            <th>Có sẵn</th>
+                            <th>Đang mượn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.Books)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@b.Title</td>
+                                <td>@b.CategoryName</td>
+                                <td>@b.Author</td>
+                                <td>
+                                    <span class="badge bg-success">@b.AvailableCount</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">@b.BorrowedCount</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+

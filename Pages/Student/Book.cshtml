@@ -1,0 +1,368 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Student.BorrowBooksModel
+@{
+    ViewData["Title"] = "Mượn Sách";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sunny-yellow': '#FFD93D',
+                        'soft-orange': '#FF8400',
+                        'fresh-green': '#6BCB77',
+                        'soft-blue': '#4D96FF',
+                    },
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl-friendly': '24px',
+                        '2xl-friendly': '32px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FFFDF5; }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="bg-sunny-yellow p-2 rounded-xl-friendly">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </div>
+                <span class="font-bold text-xl tracking-tight hidden md:block">Thư Viện Nhí</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Badge số sách đang mượn -->
+                <div class="flex items-center gap-2 bg-soft-orange/10 px-4 py-2 rounded-xl-friendly">
+                    <svg class="h-5 w-5 text-soft-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"></path>
+                    </svg>
+                    <span class="text-soft-orange font-bold text-sm">@Model.PendingCount / 5 sách đang mượn</span>
+                </div>
+
+                <!-- Thông tin học sinh -->
+                <div class="hidden md:flex items-center gap-2">
+                    <div class="w-8 h-8 bg-sunny-yellow rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        @(Model.CurrentStudent?.FullName?.FirstOrDefault() ?? 'S')
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold leading-tight">@Model.CurrentStudent?.FullName</p>
+                        <p class="text-xs text-gray-500">Lớp @Model.StudentClassName</p>
+                    </div>
+                </div>
+
+                <!-- Nút Sách yêu thích -->
+                <a href="/Student/FavoriteBooks" class="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors font-medium">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <span class="hidden sm:block">Sách yêu thích</span>
+                </a>
+
+                <a href="/" class="flex items-center gap-2 text-gray-600 hover:text-soft-orange transition-colors">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span class="font-medium hidden sm:block">Trang chủ</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-10">
+
+        <!-- Tiêu đề -->
+        <div class="mb-8 flex items-end justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-1">
+                    Mượn Sách 📚
+                </h1>
+                <p class="text-gray-500">
+                    Chọn sách bạn muốn mượn — tối đa <span class="font-bold text-soft-orange">5 quyển</span> cùng lúc
+                </p>
+            </div>
+        </div>
+
+        <!-- Thông báo kết quả -->
+        @if (TempData["Message"] != null)
+        {
+            var isSuccess = TempData["MessageType"]?.ToString() == "success";
+            <div class="mb-6 flex items-start gap-3 px-5 py-4 rounded-2xl-friendly border
+                        @(isSuccess ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800")">
+                @if (isSuccess)
+                {
+                    <svg class="h-5 w-5 mt-0.5 text-fresh-green shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                }
+                else
+                {
+                    <svg class="h-5 w-5 mt-0.5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.876c1.296 0 2.18-1.302 1.668-2.476L13.668 4.524C13.147 3.33 11.853 3.33 11.332 4.524L4.394 16.524C3.882 17.698 4.766 19 6.062 19z"></path>
+                    </svg>
+                }
+                <p class="font-medium">@TempData["Message"]</p>
+            </div>
+        }
+
+        <!-- Thanh tìm kiếm + lọc danh mục -->
+        <form method="get" class="mb-8 flex flex-col sm:flex-row gap-4">
+            <div class="flex-1 relative">
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" name="search" value="@Request.Query["search"]"
+                       placeholder="Tìm kiếm tên sách hoặc tác giả..."
+                       class="w-full pl-12 pr-4 py-3 rounded-xl-friendly border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sunny-yellow transition-all" />
+            </div>
+            <select name="categoryId" class="px-4 py-3 rounded-xl-friendly border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sunny-yellow font-medium">
+                <option value="">Tất cả danh mục</option>
+                @foreach (var cat in Model.Categories)
+                {
+                    var selected = Request.Query["categoryId"].ToString() == cat.CategoryId.ToString() ? "selected" : "";
+                    <option value="@cat.CategoryId" selected="@(selected == "selected")">@cat.CategoryName</option>
+                }
+            </select>
+            <button type="submit" class="px-6 py-3 bg-sunny-yellow hover:bg-yellow-400 text-gray-800 font-bold rounded-xl-friendly transition-colors">
+                Tìm kiếm
+            </button>
+        </form>
+
+        <!-- Danh sách sách -->
+        @if (Model.Books.Any())
+        {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @foreach (var book in Model.Books)
+                {
+                    var availableCopies = book.BookCopies?.Where(c => c.Status == "Available").ToList() ?? new();
+                    var firstAvailableCopy = availableCopies.FirstOrDefault();
+                    var totalCopies = book.BookCopies?.Count ?? 0;
+
+                    <div class="bg-white rounded-2xl-friendly shadow-md hover:shadow-xl transition-shadow overflow-hidden flex flex-col">
+                        <!-- Ảnh bìa -->
+                        <div class="aspect-[3/4] bg-gray-100 relative overflow-hidden">
+                            <img alt="@book.Title"
+                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                 src="https://images.unsplash.com/photo-1544648151-0738d38e67f7?auto=format&fit=crop&q=80&w=400" />
+
+                            <!-- Badge thể loại -->
+                            @if (book.Category != null)
+                            {
+                                <div class="absolute top-3 left-3 bg-soft-blue text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    @book.Category.CategoryName
+                                </div>
+                            }
+
+                            <!-- Badge số bản -->
+                            <div class="absolute top-3 right-3 @(availableCopies.Count > 0 ? "bg-fresh-green" : "bg-red-400") text-white text-xs font-bold px-2 py-1 rounded-full">
+                                @availableCopies.Count/@totalCopies
+                            </div>
+
+                            <!-- Nút Yêu thích (Trái tim) -->
+                            <form method="post" asp-page-handler="ToggleFavorite" class="absolute bottom-3 right-3 z-10">
+                                <input type="hidden" name="bookId" value="@book.BookId" />
+                                <button type="submit" class="p-2 bg-white/90 hover:bg-white rounded-full shadow-md backdrop-blur-sm transition-transform hover:scale-110 group">
+                                    @if (Model.FavoriteBookIds.Contains(book.BookId))
+                                    {
+                                        <svg class="h-5 w-5 text-red-500 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                        </svg>
+                                    }
+                                    else
+                                    {
+                                        <svg class="h-5 w-5 text-gray-400 group-hover:text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    }
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Thông tin sách -->
+                        <div class="p-4 flex flex-col flex-1">
+                            <h2 class="font-bold text-base mb-1 line-clamp-2 leading-snug">@book.Title</h2>
+                            <p class="text-gray-500 text-sm mb-1">@book.Author</p>
+                            <p class="text-gray-400 text-xs mb-4">NXB: @(book.Publisher ?? "–") · @book.PublishYear</p>
+
+                            <!-- Trạng thái có sẵn -->
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="inline-block w-2 h-2 rounded-full @(availableCopies.Count > 0 ? "bg-fresh-green" : "bg-red-400")"></span>
+                                <span class="text-sm font-medium @(availableCopies.Count > 0 ? "text-fresh-green" : "text-red-400")">
+                                    @(availableCopies.Count > 0 ? $"Còn {availableCopies.Count} bản có sẵn" : "Hết sách")
+                                </span>
+                            </div>
+
+                            <!-- Nút hành động -->
+                            <div class="mt-auto flex gap-2">
+                                @if (Model.RequestedBookIds.Contains(book.BookId))
+                                {
+                                    <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
+                                        Đã đăng ký
+                                    </button>
+                                }
+                                else if (firstAvailableCopy != null && Model.PendingCount < 5)
+                                {
+                                    <button type="button" onclick="openBorrowModal(@firstAvailableCopy.CopyId, '@Html.Raw(book.Title.Replace("'", "\\'"))')"
+                                            class="w-full py-2.5 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly text-sm transition-colors flex-1">
+                                        Mượn sách
+                                    </button>
+                                }
+                                else if (Model.PendingCount >= 5)
+                                {
+                                    <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-400 font-bold rounded-xl-friendly text-sm cursor-not-allowed">
+                                        Đủ 5 quyển
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-400 font-bold rounded-xl-friendly text-sm cursor-not-allowed">
+                                        Hết sách
+                                    </button>
+                                }
+
+                                <a href="/Books/Details?id=@book.BookId"
+                                   class="px-3 py-2.5 bg-gray-100 hover:bg-soft-blue hover:text-white text-gray-600 font-bold rounded-xl-friendly text-sm transition-colors">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-20">
+                <div class="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                    <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-700 mb-2">Không tìm thấy sách nào</h2>
+                <p class="text-gray-500 mb-6">Thử tìm kiếm với từ khóa khác hoặc chọn danh mục khác</p>
+                <a href="/Student/Book" class="inline-block px-6 py-3 bg-sunny-yellow hover:bg-yellow-400 text-gray-800 font-bold rounded-xl-friendly transition-colors">
+                    Xem tất cả sách
+                </a>
+            </div>
+        }
+    </main>
+
+    <!-- Borrow Request Modal -->
+    <div id="borrowModal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeBorrowModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white rounded-2xl-friendly shadow-xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-xl font-bold text-gray-900">Đăng ký mượn sách</h3>
+                    <button onclick="closeBorrowModal()" class="text-gray-400 hover:text-red-500 transition-colors">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <form method="post" asp-page-handler="Borrow">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="copyId" id="modalCopyId" />
+                    
+                    <div class="space-y-4">
+                        <!-- Book Info -->
+                        <div class="bg-sunny-yellow/10 p-4 rounded-xl-friendly">
+                            <p class="text-sm font-bold text-gray-700 mb-1">Quyển sách:</p>
+                            <p id="modalBookTitle" class="text-base font-bold text-soft-orange leading-snug"></p>
+                        </div>
+
+                        <!-- Student Info -->
+                        <div class="bg-gray-50 border border-gray-100 p-4 rounded-xl-friendly space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Người mượn:</span>
+                                <span class="text-sm font-bold text-gray-800">@Model.CurrentStudent?.FullName</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Lớp:</span>
+                                <span class="text-sm font-bold text-gray-800">@Model.StudentClassName</span>
+                            </div>
+                        </div>
+
+                        <!-- Date Selection -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Ngày dự kiến trả (Tối đa 1 tuần)</label>
+                            <input type="date" name="expectedReturnDate" id="modalReturnDate" required
+                                   class="w-full px-4 py-2.5 rounded-xl-friendly border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sunny-yellow" />
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex gap-3">
+                        <button type="button" onclick="closeBorrowModal()" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl-friendly transition-colors">
+                            Hủy
+                        </button>
+                        <button type="submit" class="flex-1 py-2.5 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly transition-colors">
+                            Xác nhận mượn
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openBorrowModal(copyId, title) {
+            document.getElementById('modalCopyId').value = copyId;
+            document.getElementById('modalBookTitle').innerText = title;
+            
+            // Set min/max dates
+            const today = new Date();
+            const minDate = today.toISOString().split('T')[0];
+            
+            const max = new Date();
+            max.setDate(today.getDate() + 7);
+            const maxDate = max.toISOString().split('T')[0];
+
+            const dateInput = document.getElementById('modalReturnDate');
+            dateInput.min = minDate;
+            dateInput.max = maxDate;
+            
+            // Default select today + 7
+            dateInput.value = maxDate;
+
+            const modal = document.getElementById('borrowModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeBorrowModal() {
+            const modal = document.getElementById('borrowModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
+</body>
+</html>

@@ -25,30 +25,33 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
 
         public async Task OnGetAsync()
         {
-            // For demo purposes, we fetch the first student if no session exists
-            // In a real app, you would get this from the logged-in user's identity
-            CurrentUser = await _context.Users
-                .Include(u => u.ClassesNavigation)
-                .FirstOrDefaultAsync(u => u.RoleId == 3); // Assuming 3 is Student role
-
-            if (CurrentUser != null)
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId.HasValue)
             {
-                var userClass = CurrentUser.ClassesNavigation.FirstOrDefault();
-                UserClassName = userClass?.ClassName ?? "N/A";
+                CurrentUser = await _context.Users
+                    .Include(u => u.ClassesNavigation)
+                    .Include(u => u.BorrowRecordStudents)
+                    .FirstOrDefaultAsync(u => u.UserId == userId.Value);
 
-                Notifications = await _context.Notifications
-                    .Where(n => n.UserId == CurrentUser.UserId)
-                    .OrderByDescending(n => n.CreatedAt)
-                    .Take(5)
-                    .ToListAsync();
+                if (CurrentUser != null)
+                {
+                    var userClass = CurrentUser.ClassesNavigation.FirstOrDefault();
+                    UserClassName = userClass?.ClassName ?? "N/A";
 
-                Recommendations = await _context.TeacherRecommendations
-                    .Include(r => r.Book)
-                        .ThenInclude(b => b!.BookCopies)
-                    .Include(r => r.Teacher)
-                    .OrderByDescending(r => r.CreatedAt)
-                    .Take(2)
-                    .ToListAsync();
+                    Notifications = await _context.Notifications
+                        .Where(n => n.UserId == CurrentUser.UserId)
+                        .OrderByDescending(n => n.CreatedAt)
+                        .Take(5)
+                        .ToListAsync();
+
+                    Recommendations = await _context.TeacherRecommendations
+                        .Include(r => r.Book)
+                            .ThenInclude(b => b!.BookCopies)
+                        .Include(r => r.Teacher)
+                        .OrderByDescending(r => r.CreatedAt)
+                        .Take(2)
+                        .ToListAsync();
+                }
             }
 
             Categories = await _context.Categories.ToListAsync();

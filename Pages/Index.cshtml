@@ -80,54 +80,67 @@
 
             <!-- User Actions -->
             <div class="flex items-center gap-4 shrink-0">
-                <!-- Notification Bell -->
-                <div class="relative" id="notification-wrapper">
-                    <button id="notification-btn" class="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors" data-purpose="notifications">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                        </svg>
-                        @if (Model.Notifications.Any(n => n.IsRead == false))
-                        {
-                            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                        }
-                    </button>
-                    <!-- Notification Dropdown -->
-                    <div id="notification-dropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 hidden z-50">
-                        <div class="p-4 border-b border-gray-100 flex justify-between items-center">
-                            <span class="font-bold">Thông báo mới</span>
-                            <span class="text-xs text-soft-orange cursor-pointer">Đánh dấu đã đọc</span>
-                        </div>
-                        <div class="max-h-64 overflow-y-auto">
-                            @if (Model.Notifications.Any())
+                @if (Model.CurrentUser != null)
+                {
+                    <!-- Notification Bell -->
+                    <div class="relative" id="notification-wrapper">
+                        <button id="notification-btn" class="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors" data-purpose="notifications">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                            </svg>
+                            @if (Model.Notifications.Any(n => n.IsRead == false))
                             {
-                                foreach (var notif in Model.Notifications)
+                                <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                            }
+                        </button>
+                        <!-- Notification Dropdown -->
+                        <div id="notification-dropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 hidden z-50">
+                            <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                                <span class="font-bold">Thông báo mới</span>
+                                <span class="text-xs text-soft-orange cursor-pointer">Đánh dấu đã đọc</span>
+                            </div>
+                            <div class="max-h-64 overflow-y-auto">
+                                @if (Model.Notifications.Any())
                                 {
-                                    <div class="p-3 border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                                        <p class="text-sm font-medium">@notif.Message</p>
-                                        <p class="text-xs text-gray-400 mt-1">@notif.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                                    foreach (var notif in Model.Notifications)
+                                    {
+                                        <div class="p-3 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                                            <p class="text-sm font-medium">@notif.Message</p>
+                                            <p class="text-xs text-gray-400 mt-1">@notif.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="p-4 text-center text-sm text-gray-400">
+                                        Không có thông báo mới.
                                     </div>
                                 }
-                            }
-                            else
-                            {
-                                <div class="p-4 text-center text-sm text-gray-400">
-                                    Không có thông báo mới.
-                                </div>
-                            }
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Student Profile -->
-                <div class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100" data-purpose="student-profile">
-                    <div class="text-right hidden sm:block">
-                        <div class="text-sm font-bold leading-none">@Model.CurrentUser?.FullName</div>
-                        <div class="text-[10px] text-gray-500 font-medium tracking-wider uppercase">Lớp @Model.UserClassName</div>
+                    <!-- Student Profile -->
+                    <div class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100" data-purpose="student-profile">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-bold leading-none">@Model.CurrentUser.FullName</div>
+                            <div class="text-[10px] text-gray-500 font-medium tracking-wider uppercase">Lớp @Model.UserClassName</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-soft-orange border-2 border-white overflow-hidden">
+                            <img alt="Avatar" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(Model.CurrentUser.FullName)&background=FF8400&color=fff" />
+                        </div>
                     </div>
-                    <div class="w-10 h-10 rounded-full bg-soft-orange border-2 border-white overflow-hidden">
-                        <img alt="Avatar" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(Model.CurrentUser?.FullName ?? "U")&background=FF8400&color=fff" />
-                    </div>
-                </div>
+                }
+                else
+                {
+                    <!-- Login Button -->
+                    <a href="/Login" class="flex items-center gap-2 bg-soft-blue hover:bg-blue-600 text-white px-5 py-2.5 rounded-full font-bold transition-all hover:scale-105 shadow-md">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                        </svg>
+                        <span>Đăng nhập</span>
+                    </a>
+                }
             </div>
         </div>
     </nav>
@@ -141,18 +154,44 @@
             <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-yellow-300 rounded-full opacity-50 blur-3xl"></div>
             <div class="relative z-10 w-full md:w-1/2 space-y-6 text-center md:text-left">
                 <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 leading-tight">
-                    Chào bạn, <span class="text-soft-orange">@Model.CurrentUser?.FullName!</span>
+                    @if (Model.CurrentUser != null)
+                    {
+                        <span>Chào bạn, <span class="text-soft-orange">@Model.CurrentUser.FullName!</span></span>
+                    }
+                    else
+                    {
+                        <span>Chào <span class="text-soft-orange">bạn nhỏ!</span> 📚</span>
+                    }
                 </h1>
                 <p class="text-lg md:text-xl text-gray-800 opacity-90">
-                    Hôm nay bạn muốn phiêu lưu vào cuốn sách nào? Có rất nhiều thế giới mới đang chờ bạn đấy!
+                    @if (Model.CurrentUser != null)
+                    {
+                        <span>Hôm nay bạn muốn phiêu lưu vào cuốn sách nào? Có rất nhiều thế giới mới đang chờ bạn đấy!</span>
+                    }
+                    else
+                    {
+                        <span>Khám phá kho sách tuyệt vời của thư viện. Đăng nhập để mượn sách ngay nào!</span>
+                    }
                 </p>
                 <div class="flex flex-wrap gap-4 justify-center md:justify-start pt-2">
-                    <button class="px-8 py-4 bg-gray-900 text-white font-bold rounded-xl-friendly hover:bg-gray-800 transition-all hover:scale-105 shadow-lg">
-                        Khám phá ngay
-                    </button>
-                    <button class="px-8 py-4 bg-white text-gray-900 font-bold rounded-xl-friendly border-2 border-transparent hover:border-white hover:bg-transparent transition-all hover:scale-105">
-                        Tủ sách của tôi
-                    </button>
+                    @if (Model.CurrentUser != null)
+                    {
+                        <button class="px-8 py-4 bg-gray-900 text-white font-bold rounded-xl-friendly hover:bg-gray-800 transition-all hover:scale-105 shadow-lg">
+                            Khám phá ngay
+                        </button>
+                        <button class="px-8 py-4 bg-white text-gray-900 font-bold rounded-xl-friendly border-2 border-transparent hover:border-white hover:bg-transparent transition-all hover:scale-105">
+                            Tủ sách của tôi
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="/Login" class="px-8 py-4 bg-soft-blue text-white font-bold rounded-xl-friendly hover:bg-blue-600 transition-all hover:scale-105 shadow-lg inline-block">
+                            Đăng nhập ngay
+                        </a>
+                        <a href="#categories" class="px-8 py-4 bg-white text-gray-900 font-bold rounded-xl-friendly border-2 border-gray-200 hover:border-sunny-yellow hover:bg-sunny-yellow/20 transition-all hover:scale-105 inline-block">
+                            Khám phá sách
+                        </a>
+                    }
                 </div>
             </div>
             <div class="relative z-10 w-full md:w-1/2 flex justify-center">
@@ -193,7 +232,16 @@
         <!-- BEGIN: Teacher Recommendations -->
         <section data-purpose="teacher-recommendations">
             <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-bold">Gợi ý từ Thầy Cô lớp @Model.UserClassName</h2>
+                <h2 class="text-2xl font-bold">
+                    @if (Model.CurrentUser != null)
+                    {
+                        <span>Gợi ý từ Thầy Cô lớp @Model.UserClassName</span>
+                    }
+                    else
+                    {
+                        <span>Gợi ý từ Thầy Cô 📖</span>
+                    }
+                </h2>
                 <a class="text-soft-orange font-bold hover:underline" href="/TeacherRecommendations">Xem tất cả →</a>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -253,18 +301,36 @@
             <div class="flex items-center gap-6">
                 <div class="w-16 h-16 bg-fresh-green/20 rounded-2xl flex items-center justify-center text-3xl">🏅</div>
                 <div>
-                    <h3 class="font-bold text-xl">Thành tích của @(Model.CurrentUser?.FullName?.Split(' ').LastOrDefault() ?? "bạn")</h3>
-                    <p class="text-gray-500">Cố gắng lên nhé, bạn đang làm rất tốt!</p>
+                    @if (Model.CurrentUser != null)
+                    {
+                        <h3 class="font-bold text-xl">Thành tích của @Model.CurrentUser.FullName.Split(' ').LastOrDefault()</h3>
+                        <p class="text-gray-500">Cố gắng lên nhé, bạn đang làm rất tốt!</p>
+                    }
+                    else
+                    {
+                        <h3 class="font-bold text-xl">Thư Viện Nhí - Vui học mỗi ngày</h3>
+                        <p class="text-gray-500">Đăng nhập để khám phá kho sách tuyệt vời!</p>
+                    }
                 </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full md:w-auto">
-                <div class="bg-gray-50 px-6 py-4 rounded-xl-friendly text-center border border-gray-100">
-                    <div class="text-2xl font-black text-soft-blue">@Model.CurrentUser?.BorrowRecordStudents.Count</div>
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Đã mượn</div>
-                </div>
+                @if (Model.CurrentUser != null)
+                {
+                    <div class="bg-gray-50 px-6 py-4 rounded-xl-friendly text-center border border-gray-100">
+                        <div class="text-2xl font-black text-soft-blue">@Model.CurrentUser.BorrowRecordStudents.Count</div>
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Đã mượn</div>
+                    </div>
+                }
+                else
+                {
+                    <div class="bg-gray-50 px-6 py-4 rounded-xl-friendly text-center border border-gray-100">
+                        <div class="text-2xl font-black text-soft-blue">@Model.FeaturedBooks.Count</div>
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Sách mới</div>
+                    </div>
+                }
                 <div class="bg-gray-50 px-6 py-4 rounded-xl-friendly text-center border border-gray-100">
                     <div class="text-2xl font-black text-soft-orange">@Model.Recommendations.Count</div>
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Đề xuất mới</div>
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Đề xuất</div>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 rounded-xl-friendly text-center border border-gray-100">
                     <div class="text-2xl font-black text-fresh-green">@Model.Categories.Count</div>
@@ -272,9 +338,18 @@
                 </div>
             </div>
             <div class="shrink-0">
-                <button class="bg-fresh-green hover:bg-green-500 text-white px-8 py-3 rounded-xl-friendly font-bold shadow-lg transition-all">
-                    Xem bảng xếp hạng
-                </button>
+                @if (Model.CurrentUser != null)
+                {
+                    <button class="bg-fresh-green hover:bg-green-500 text-white px-8 py-3 rounded-xl-friendly font-bold shadow-lg transition-all">
+                        Xem bảng xếp hạng
+                    </button>
+                }
+                else
+                {
+                    <a href="/Login" class="bg-soft-blue hover:bg-blue-600 text-white px-8 py-3 rounded-xl-friendly font-bold shadow-lg transition-all inline-block">
+                        Đăng nhập ngay
+                    </a>
+                }
             </div>
         </div>
         <div class="mt-8 text-center text-gray-400 text-sm">

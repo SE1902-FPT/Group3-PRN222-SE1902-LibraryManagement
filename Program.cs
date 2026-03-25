@@ -13,6 +13,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddSession();
             builder.Services.AddAuthorization();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -53,6 +54,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession();
 
             // Lưu ý: Phải có UseAuthentication TRƯỚC UseAuthorization
             app.UseAuthentication();

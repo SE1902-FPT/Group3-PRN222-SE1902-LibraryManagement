@@ -18,7 +18,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public string ErrorMessage { get; set; }
 
         // Chuỗi kết nối Database của bạn
-        private readonly string connectionString = @"Server=DESKTOP-Q602A7J;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
+        private readonly string connectionString = @"Server=localhost;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
 
         public void OnGet()
         {
@@ -85,19 +85,19 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                             switch (roleName)
                             {
                                 case "Admin":
-                                    return RedirectToPage("/AdminDashboard"); // Chuyển đến trang của Quản trị viên
+                                    return RedirectToPage("/Admin/Index"); // Chuyển đến trang của Quản trị viên
 
                                 case "Librarian":
                                     return RedirectToPage("/Librarian/Libralian_Dashboard"); // Chuyển đến trang của Thủ thư
 
                                 case "Teacher":
-                                    return RedirectToPage("/TeacherDashboard"); // Chuyển đến trang của Giáo viên
+                                    return RedirectToPage("/Teacher/Index"); // Chuyển đến trang của Giáo viên
 
                                 case "Parent":
-                                    return RedirectToPage("/ParentDashboard"); // Chuyển đến trang của Phụ huynh
+                                    return RedirectToPage("/Parent/Index"); // Chuyển đến trang của Phụ huynh
 
                                 case "Student":
-                                    return RedirectToPage("/StudentDashboard"); // Chuyển đến trang của Học sinh
+                                    return RedirectToPage("/Student/Index"); // Chuyển đến trang của Học sinh
 
                                 default:
                                     // Đề phòng trường hợp lỗi hoặc có quyền lạ chưa được định nghĩa

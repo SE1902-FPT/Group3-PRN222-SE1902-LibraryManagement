@@ -24,11 +24,10 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
         public User? CurrentStudent { get; set; }
         public string? StudentClassName { get; set; }
         public int PendingCount { get; set; }
-        public List<int> RequestedBookIds { get; set; } = new();
+        public Dictionary<int, string> BookRequestStatuses { get; set; } = new();
 
-        // =============================================
+
         // OnGetAsync: Load danh sách sách yêu thích
-        // =============================================
         public async Task<IActionResult> OnGetAsync()
         {
             if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
@@ -49,22 +48,29 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
             var studentId = CurrentStudent.UserId;
             StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
 
+         // Đếm số sách đang chờ duyệt
             PendingCount = await _context.BorrowRequests
-                .CountAsync(r => r.StudentId == studentId && r.Status == "Pending");
-
+                .CountAsync(r => r.StudentId == studentId && (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
+        // lấy danh sách sách yêu thích
             var favoriteBookIds = await _context.FavoriteBooks
                 .Where(fb => fb.StudentId == studentId)
                 .Select(fb => fb.BookId)
                 .ToListAsync();
-
-            RequestedBookIds = await _context.BorrowRequests
+        // lấy request 
+            var requests = await _context.BorrowRequests
                 .Include(r => r.Copy)
                 .Where(r => r.StudentId == studentId && r.Copy != null && r.Copy.BookId != null &&
                             (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"))
-                .Select(r => r.Copy.BookId ?? 0)
-                .Distinct()
                 .ToListAsync();
-
+        // tạo thư viện cho từng trạn thái của sách
+            BookRequestStatuses = requests
+                .GroupBy(r => r.Copy.BookId.Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Any(r => r.Status == "Borrowed") ? "Borrowed" :
+                         g.Any(r => r.Status == "Approved") ? "Approved" : "Pending"
+                );
+        // lấy danh sách sách yêu thích
             Books = await _context.Books
                 .Include(b => b.Category)
                 .Include(b => b.BookCopies)
@@ -75,9 +81,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
             return Page();
         }
 
-        // =============================================
         // OnPostRemoveFavoriteAsync: Bỏ yêu thích
-        // =============================================
         public async Task<IActionResult> OnPostRemoveFavoriteAsync(int bookId)
         {
             if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
@@ -103,9 +107,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
             return RedirectToPage();
         }
 
-        // =============================================
+ 
         // OnPostBorrowAsync: Tạo yêu cầu mượn sách
-        // =============================================
         public async Task<IActionResult> OnPostBorrowAsync(int copyId, DateTime expectedReturnDate)
         {
             if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
@@ -147,7 +150,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
 
             if (pendingCount >= 5)
             {
-                Message = "Bạn chỉ được mượn tối đa 5 quyển sách cùng lúc!";
+                Message = "Bạn chỉ được tạo tối đa 5 yêu cầu!";
                 MessageType = "error";
                 return RedirectToPage();
             }
@@ -164,7 +167,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
             _context.BorrowRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            Message = $"✅ Đăng ký mượn cuốn \"{copy.Book.Title}\" thành công! Ngày dự kiến trả: {expectedReturnDate:dd/MM/yyyy}";
+            Message = $"Đăng ký mượn cuốn \"{copy.Book.Title}\" thành công! Ngày dự kiến trả: {expectedReturnDate:dd/MM/yyyy}";
             MessageType = "success";
             return RedirectToPage();
         }

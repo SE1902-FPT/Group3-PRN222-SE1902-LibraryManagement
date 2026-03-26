@@ -59,7 +59,7 @@
                     <svg class="h-5 w-5 text-soft-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"></path>
                     </svg>
-                    <span class="text-soft-orange font-bold text-sm">@Model.PendingCount / 5 sách đang mượn</span>
+                    <span class="text-soft-orange font-bold text-sm">@Model.PendingCount / 5 yêu cầu chờ duyệt</span>
                 </div>
 
                 <div class="hidden md:flex items-center gap-2">
@@ -181,11 +181,21 @@
 
                             <!-- Nút hành động -->
                             <div class="mt-auto flex gap-2">
-                                @if (Model.RequestedBookIds.Contains(book.BookId))
+                                @if (Model.BookRequestStatuses.ContainsKey(book.BookId))
                                 {
-                                    <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
-                                        Đã đăng ký
-                                    </button>
+                                    var status = Model.BookRequestStatuses[book.BookId];
+                                    if (status == "Approved" || status == "Borrowed")
+                                    {
+                                        <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
+                                            Đã được mượn
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
+                                            Đã đăng ký
+                                        </button>
+                                    }
                                 }
                                 else if (firstAvailableCopy != null && Model.PendingCount < 5)
                                 {
@@ -197,7 +207,7 @@
                                 else if (Model.PendingCount >= 5)
                                 {
                                     <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-400 font-bold rounded-xl-friendly text-sm cursor-not-allowed">
-                                        Đủ 5 quyển
+                                        Đã đủ 5 yêu cầu
                                     </button>
                                 }
                                 else

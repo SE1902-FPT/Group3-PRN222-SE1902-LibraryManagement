@@ -18,7 +18,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public string ErrorMessage { get; set; }
 
         // Chuỗi kết nối Database của bạn
-        private readonly string connectionString = @"Server=DESKTOP-Q602A7J;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
+        private readonly string connectionString = @"Server=DESKTOP-9CCGUJS\SQLEXPRESS01;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
 
         public void OnGet()
         {

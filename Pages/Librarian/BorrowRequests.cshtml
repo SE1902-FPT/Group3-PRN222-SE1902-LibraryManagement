@@ -6,6 +6,29 @@
     Layout = "_LibrarianLayout";
 }
 
+@if (!string.IsNullOrWhiteSpace(Model.ToastMessage))
+{
+    var toastClass = string.Equals(Model.ToastType, "success", StringComparison.OrdinalIgnoreCase)
+        ? "alert-success"
+        : "alert-danger";
+
+    <div class="alert @toastClass shadow"
+         role="alert"
+         style="position: fixed; top: 16px; right: 16px; z-index: 1055; min-width: 320px; max-width: 420px;">
+        <div class="d-flex align-items-start justify-content-between gap-3">
+            <div class="fw-semibold">@Model.ToastMessage</div>
+            <button type="button" class="btn-close" aria-label="Close"
+                    onclick="this.closest('.alert').remove();"></button>
+        </div>
+    </div>
+    <script>
+        setTimeout(function () {
+            var el = document.querySelector('.alert[style*=\"position: fixed\"]');
+            if (el) el.remove();
+        }, 2500);
+    </script>
+}
+
 <div class="mt-4">
     <h1 class="h3 mb-3">Duyệt request mượn sách</h1>
 
@@ -23,7 +46,7 @@
     }
 
     <div class="alert alert-info d-flex align-items-center gap-2" role="alert">
-        Librarian: <strong>@Model.LibrarianName</strong> (ID: <strong>@Model.LibrarianId</strong>)
+        Librarian: <strong>@Model.LibrarianName</strong>
     </div>
 
     <div class="table-responsive">

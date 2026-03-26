@@ -25,4 +25,8 @@
     <Folder Include="Pages\Admin\UserManagement\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Asset\" />
+  </ItemGroup>
+
 </Project>

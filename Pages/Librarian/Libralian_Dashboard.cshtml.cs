@@ -26,6 +26,7 @@ public class Librarian_DashboardModel : PageModel
     public class BookRow
     {
         public int BookId { get; set; }
+        public string? ImageUrl { get; set; }
         public string Title { get; set; } = "-";
         public string? Author { get; set; }
         public string? CategoryName { get; set; }
@@ -57,6 +58,7 @@ public class Librarian_DashboardModel : PageModel
             .Select(b => new BookRow
             {
                 BookId = b.BookId,
+                ImageUrl = b.ImageUrl,
                 Title = b.Title,
                 Author = b.Author,
                 CategoryName = b.Category != null ? b.Category.CategoryName : null,

@@ -3,8 +3,6 @@
 @{
     ViewData["Title"] = "Thư Viện Trường Học Vui Vẻ";
     Layout = null;
-    var greetingName = Model.CurrentUser?.FullName ?? "bạn";
-    var classLabel = string.IsNullOrWhiteSpace(Model.UserClassName) ? "Khách" : $"Lớp {Model.UserClassName}";
 }
 
 <!DOCTYPE html>
@@ -40,10 +38,7 @@
     </script>
     <style>
         body {
-            background:
-                radial-gradient(circle at top left, rgba(255, 217, 61, 0.25), transparent 28%),
-                radial-gradient(circle at top right, rgba(77, 150, 255, 0.18), transparent 24%),
-                #FFFDF5;
+            background-color: #FFFDF5;
         }
 
         .book-card-shadow {
@@ -60,9 +55,9 @@
     </style>
 </head>
 <body class="antialiased text-gray-800">
-    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4" data-purpose="main-navigation">
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <a href="/" class="flex items-center gap-2 shrink-0">
+            <a class="flex items-center gap-2 shrink-0" href="/">
                 <div class="bg-sunny-yellow p-2 rounded-xl-friendly">
                     <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -71,30 +66,23 @@
                 <span class="font-bold text-xl tracking-tight hidden md:block">Thư Viện Nhí</span>
             </a>
 
-            <form method="get" asp-page="/Index" class="hidden lg:flex flex-grow max-w-2xl items-center gap-3" data-purpose="search-container">
-                <div class="flex-grow relative">
-                    <input name="search" value="@Model.SearchTerm" class="w-full pl-12 pr-4 py-3 rounded-full border-2 border-gray-100 focus:border-sunny-yellow focus:ring-0 text-sm md:text-base" placeholder="Tìm kiếm sách, tác giả, ISBN..." type="text" />
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                        </svg>
-                    </div>
+            <form action="/Search" method="get" class="flex-grow max-w-xl relative">
+                <input class="w-full pl-12 pr-24 py-3 rounded-full border-2 border-gray-100 focus:border-sunny-yellow focus:ring-0 text-sm md:text-base" name="search" placeholder="Tìm sách, tác giả, nhà xuất bản..." type="text" value="@Model.SearchTerm" />
+                <input name="categoryId" type="hidden" value="@(Model.SelectedCategoryId?.ToString() ?? string.Empty)" />
+                <input name="availability" type="hidden" value="@Model.Availability" />
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
                 </div>
-                <select name="categoryId" class="rounded-full border-2 border-gray-100 px-4 py-3 text-sm focus:border-sunny-yellow focus:ring-0">
-                    <option value="">Tất cả thể loại</option>
-                    @foreach (var category in Model.Categories)
-                    {
-                        <option value="@category.CategoryId" selected="@(Model.SelectedCategoryId == category.CategoryId)">@category.CategoryName</option>
-                    }
-                </select>
-                <button type="submit" class="px-5 py-3 rounded-full bg-gray-900 text-white font-bold hover:bg-gray-800 transition-colors">
-                    Tìm
+                <button class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-gray-900 text-white text-sm font-bold rounded-full hover:bg-soft-orange transition-colors" type="submit">
+                    Search
                 </button>
             </form>
 
             <div class="flex items-center gap-4 shrink-0">
                 <div class="relative" id="notification-wrapper">
-                    <button id="notification-btn" class="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors" data-purpose="notifications" type="button">
+                    <button id="notification-btn" class="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                         </svg>
@@ -104,9 +92,8 @@
                         }
                     </button>
                     <div id="notification-dropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 hidden z-50">
-                        <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                        <div class="p-4 border-b border-gray-100">
                             <span class="font-bold">Thông báo mới</span>
-                            <span class="text-xs text-soft-orange">@(Model.Notifications.Count) mục</span>
                         </div>
                         <div class="max-h-64 overflow-y-auto">
                             @if (Model.Notifications.Any())
@@ -130,42 +117,43 @@
                 </div>
 
                 <div class="relative" id="profile-wrapper">
-                    <button id="profile-btn" type="button" class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 hover:border-sunny-yellow transition-colors" data-purpose="student-profile">
+                    <button id="profile-btn" class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 hover:border-sunny-yellow transition-colors">
                         <div class="text-right hidden sm:block">
-                            <div class="text-sm font-bold leading-none">@greetingName</div>
-                            <div class="text-[10px] text-gray-500 font-medium tracking-wider uppercase">@classLabel</div>
+                            <div class="text-sm font-bold leading-none">@(Model.CurrentUser?.FullName ?? "Khách")</div>
+                            <div class="text-[10px] text-gray-500 font-medium tracking-wider uppercase">Lớp @Model.UserClassName</div>
                         </div>
                         <div class="w-10 h-10 rounded-full bg-soft-orange border-2 border-white overflow-hidden">
-                            <img alt="Avatar" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(greetingName)&background=FF8400&color=fff" />
+                            <img alt="Avatar" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(Model.CurrentUser?.FullName ?? "U")&background=FF8400&color=fff" />
                         </div>
                     </button>
 
                     <div id="profile-dropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 hidden z-50 overflow-hidden">
-                        <div class="px-4 py-4 bg-gray-50 border-b border-gray-100">
-                            <p class="font-bold text-sm">@greetingName</p>
-                            <p class="text-xs text-gray-500 mt-1">@classLabel</p>
+                        <div class="px-4 py-4 bg-gradient-to-r from-sunny-yellow/30 to-soft-orange/20 border-b border-gray-100">
+                            <p class="font-bold text-sm">@(Model.CurrentUser?.FullName ?? "Khách")</p>
+                            <p class="text-xs text-gray-500 mt-1">Lớp @Model.UserClassName</p>
                         </div>
                         <div class="p-2">
-                            <a href="/Student/FavoriteBooks" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-50 text-gray-700 hover:text-red-500 transition-colors">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                </svg>
-                                <span class="font-medium">Sách yêu thích</span>
-                            </a>
-                            <a asp-page="/Search" asp-route-search="@Model.SearchTerm" asp-route-categoryId="@Model.SelectedCategoryId" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-blue-50 text-gray-700 hover:text-soft-blue transition-colors">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                                <span class="font-medium">Trang tìm kiếm</span>
-                            </a>
-                            <form method="post" asp-page="/Logout">
-                                <button type="submit" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-100 text-gray-700 transition-colors text-left">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"></path>
+                            <a class="flex items-center justify-between px-3 py-3 rounded-xl hover:bg-gray-50 transition-colors" href="/Student/FavoriteBooks">
+                                <span class="flex items-center gap-3 text-sm font-medium text-gray-700">
+                                    <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0"></path>
                                     </svg>
-                                    <span class="font-medium">Logout</span>
-                                </button>
-                            </form>
+                                    Danh sách yêu thích
+                                </span>
+                                <span class="text-xs font-bold text-soft-orange">@Model.FavoriteCount</span>
+                            </a>
+                            <a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700" href="/Search?search=@Uri.EscapeDataString(Model.SearchTerm)">
+                                <svg class="h-5 w-5 text-soft-blue" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                Trang Search
+                            </a>
+                            <a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-50 transition-colors text-sm font-medium text-red-500" href="/Logout">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                Logout
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -174,20 +162,20 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-6 py-8 space-y-12">
-        <section class="relative bg-sunny-yellow rounded-2xl-friendly overflow-hidden p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center gap-8" data-purpose="hero-banner">
+        <section class="relative bg-sunny-yellow rounded-2xl-friendly overflow-hidden p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center gap-8">
             <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-yellow-300 rounded-full opacity-50 blur-3xl"></div>
             <div class="relative z-10 w-full md:w-1/2 space-y-6 text-center md:text-left">
                 <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 leading-tight">
-                    Chào bạn, <span class="text-soft-orange">@greetingName!</span>
+                    Chào bạn, <span class="text-soft-orange">@Model.CurrentUser?.FullName!</span>
                 </h1>
                 <p class="text-lg md:text-xl text-gray-800 opacity-90">
-                    Tìm sách nhanh hơn với ô search và bộ lọc theo chủ đề ngay trên trang chủ.
+                    Tìm đúng cuốn sách mình cần nhanh hơn với search và bộ lọc ngay trên trang chủ.
                 </p>
                 <div class="flex flex-wrap gap-4 justify-center md:justify-start pt-2">
-                    <a asp-page="/Search" asp-route-search="@Model.SearchTerm" asp-route-categoryId="@Model.SelectedCategoryId" class="px-8 py-4 bg-gray-900 text-white font-bold rounded-xl-friendly hover:bg-gray-800 transition-all hover:scale-105 shadow-lg">
-                        Mở trang tìm kiếm
+                    <a class="px-8 py-4 bg-gray-900 text-white font-bold rounded-xl-friendly hover:bg-gray-800 transition-all hover:scale-105 shadow-lg" href="/Search">
+                        Mở trang Search
                     </a>
-                    <a href="/Student/FavoriteBooks" class="px-8 py-4 bg-white text-gray-900 font-bold rounded-xl-friendly border-2 border-transparent hover:border-white hover:bg-transparent transition-all hover:scale-105">
+                    <a class="px-8 py-4 bg-white text-gray-900 font-bold rounded-xl-friendly border-2 border-transparent hover:border-white hover:bg-transparent transition-all hover:scale-105" href="/Student/FavoriteBooks">
                         Tủ sách yêu thích
                     </a>
                 </div>
@@ -195,69 +183,102 @@
             <div class="relative z-10 w-full md:w-1/2 flex justify-center">
                 <div class="relative w-full max-w-sm">
                     <img alt="Library Illustration" class="w-full h-auto drop-shadow-2xl rounded-2xl-friendly" src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=600" />
-                    <div class="absolute -top-4 -right-4 bg-white p-3 rounded-2xl shadow-xl animate-bounce">✨</div>
-                    <div class="absolute -bottom-4 -left-4 bg-white p-3 rounded-2xl shadow-xl">📚</div>
+                    <div class="absolute -top-4 -right-4 bg-white px-4 py-3 rounded-2xl shadow-xl">
+                        <p class="text-xs text-gray-500">Yêu thích</p>
+                        <p class="font-black text-soft-orange text-xl">@Model.FavoriteCount</p>
+                    </div>
+                    <div class="absolute -bottom-4 -left-4 bg-white px-4 py-3 rounded-2xl shadow-xl">
+                        <p class="text-xs text-gray-500">Kết quả</p>
+                        <p class="font-black text-fresh-green text-xl">@Model.FeaturedBooks.Count</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="bg-white/80 border border-white rounded-2xl-friendly p-5 md:p-6 shadow-sm lg:hidden">
-            <form method="get" asp-page="/Index" class="grid gap-4 md:grid-cols-[1fr_220px_auto]">
-                <div class="relative">
-                    <input name="search" value="@Model.SearchTerm" class="w-full pl-12 pr-4 py-3 rounded-full border-2 border-gray-100 focus:border-sunny-yellow focus:ring-0" placeholder="Tìm kiếm sách, tác giả, ISBN..." type="text" />
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                        </svg>
-                    </div>
+        <section class="bg-white rounded-2xl-friendly p-6 md:p-8 shadow-sm border border-gray-100">
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-[0.2em] text-soft-orange mb-2">Home Search + Filter</p>
+                    <h2 class="text-2xl font-bold">Lọc nhanh ngay tại trang chủ</h2>
                 </div>
-                <select name="categoryId" class="rounded-full border-2 border-gray-100 px-4 py-3 focus:border-sunny-yellow focus:ring-0">
+                <a class="text-soft-blue font-bold hover:underline" href="/Search?search=@Uri.EscapeDataString(Model.SearchTerm)&categoryId=@(Model.SelectedCategoryId?.ToString() ?? string.Empty)&availability=@Model.Availability">
+                    Sang trang Search đầy đủ →
+                </a>
+            </div>
+
+            <form class="mt-6 grid gap-4 md:grid-cols-[2fr,1fr,1fr,auto]" method="get">
+                <div class="relative">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                    <input class="w-full pl-12 pr-4 py-3 rounded-xl-friendly border border-gray-200 bg-white focus:ring-sunny-yellow focus:border-sunny-yellow" name="search" placeholder="Nhập tên sách, tác giả..." type="text" value="@Model.SearchTerm" />
+                </div>
+                <select class="px-4 py-3 rounded-xl-friendly border border-gray-200 bg-white focus:ring-sunny-yellow focus:border-sunny-yellow" name="categoryId">
                     <option value="">Tất cả thể loại</option>
                     @foreach (var category in Model.Categories)
                     {
-                        <option value="@category.CategoryId" selected="@(Model.SelectedCategoryId == category.CategoryId)">@category.CategoryName</option>
+                        if (Model.SelectedCategoryId == category.CategoryId)
+                        {
+                            <option selected value="@category.CategoryId">@category.CategoryName</option>
+                        }
+                        else
+                        {
+                            <option value="@category.CategoryId">@category.CategoryName</option>
+                        }
                     }
                 </select>
-                <button type="submit" class="px-5 py-3 rounded-full bg-gray-900 text-white font-bold">
-                    Tìm kiếm
-                </button>
+                <select class="px-4 py-3 rounded-xl-friendly border border-gray-200 bg-white focus:ring-sunny-yellow focus:border-sunny-yellow" name="availability">
+                    @if (Model.Availability == "available")
+                    {
+                        <option value="all">Tất cả trạng thái</option>
+                        <option selected value="available">Còn sách</option>
+                    }
+                    else
+                    {
+                        <option selected value="all">Tất cả trạng thái</option>
+                        <option value="available">Còn sách</option>
+                    }
+                </select>
+                <div class="flex gap-3">
+                    <button class="px-6 py-3 bg-gray-900 text-white font-bold rounded-xl-friendly hover:bg-soft-orange transition-colors" type="submit">
+                        Lọc
+                    </button>
+                    <a class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl-friendly hover:bg-gray-200 transition-colors" href="/">
+                        Reset
+                    </a>
+                </div>
             </form>
         </section>
 
-        <section data-purpose="category-list">
-            <div class="flex items-center justify-between gap-4 mb-8">
+        <section>
+            <div class="flex items-center justify-between mb-8">
                 <h2 class="text-2xl font-bold">Khám phá theo chủ đề</h2>
-                @if (Model.HasActiveFilters)
-                {
-                    <a asp-page="/Index" class="text-sm font-bold text-soft-orange hover:underline">Xóa bộ lọc</a>
-                }
+                <a class="text-soft-orange font-bold hover:underline" href="/Search">Xem tất cả thể loại</a>
             </div>
             <div class="grid gap-6" style="grid-template-columns: repeat(auto-fill, minmax(130px,1fr))">
                 @{
                     var categoryEmojis = new[] { "📖", "🔬", "🏰", "🌍", "🎨", "🎵", "🧮", "🦁" };
                     var categoryBgColors = new[] { "#4D96FF", "#6BCB77", "#FFD93D", "#FF8400", "#4D96FF", "#6BCB77", "#FFD93D", "#FF8400" };
-                    int catIdx = 0;
+                    var catIdx = 0;
                 }
                 @foreach (var cat in Model.Categories)
                 {
                     var emoji = categoryEmojis[catIdx % categoryEmojis.Length];
                     var bgColor = categoryBgColors[catIdx % categoryBgColors.Length];
                     catIdx++;
-                    var isActive = Model.SelectedCategoryId == cat.CategoryId;
-
-                    <a asp-page="/Index" asp-route-search="@Model.SearchTerm" asp-route-categoryId="@(isActive ? null : cat.CategoryId)" class="flex flex-col items-center gap-4 group">
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-300 shadow-md ring-4 @(isActive ? "ring-gray-900" : "ring-transparent")" style="background-color: @bgColor">
+                    <a class="flex flex-col items-center gap-4 group cursor-pointer" href="/?categoryId=@cat.CategoryId&search=@Uri.EscapeDataString(Model.SearchTerm)&availability=@Model.Availability">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-300 shadow-md" style="background-color: @bgColor">
                             @emoji
                         </div>
-                        <span class="font-bold text-center text-sm @(isActive ? "text-soft-orange" : "text-gray-700")">@cat.CategoryName</span>
+                        <span class="font-bold text-gray-700 text-center text-sm">@cat.CategoryName</span>
                     </a>
                 }
             </div>
         </section>
 
-        <section data-purpose="teacher-recommendations">
+        <section>
             <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-bold">Gợi ý từ Thầy Cô @(string.IsNullOrWhiteSpace(Model.UserClassName) ? string.Empty : $"lớp {Model.UserClassName}")</h2>
+                <h2 class="text-2xl font-bold">Gợi ý từ Thầy Cô lớp @Model.UserClassName</h2>
                 <a class="text-soft-orange font-bold hover:underline" href="/TeacherRecommendations">Xem tất cả →</a>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -286,31 +307,16 @@
             </div>
         </section>
 
-        <section data-purpose="search-results">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <section>
+            <div class="flex items-center justify-between gap-3 mb-8">
                 <div class="flex items-center gap-3">
-                    <h2 class="text-2xl font-bold">@(Model.HasActiveFilters ? "Kết quả tìm kiếm" : "Sách mới về thư viện")</h2>
-                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold animate-pulse">@Model.TotalMatchedBooks kết quả</span>
+                    <h2 class="text-2xl font-bold">Kết quả sách trên Home</h2>
+                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">@Model.FeaturedBooks.Count kết quả</span>
                 </div>
-                <a asp-page="/Search" asp-route-search="@Model.SearchTerm" asp-route-categoryId="@Model.SelectedCategoryId" class="text-soft-orange font-bold hover:underline">
-                    Xem trang tìm kiếm đầy đủ →
+                <a class="text-soft-blue font-bold hover:underline" href="/Search?search=@Uri.EscapeDataString(Model.SearchTerm)&categoryId=@(Model.SelectedCategoryId?.ToString() ?? string.Empty)&availability=@Model.Availability">
+                    Mở trang Search →
                 </a>
             </div>
-
-            @if (Model.HasActiveFilters)
-            {
-                <div class="mb-6 flex flex-wrap gap-2">
-                    @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
-                    {
-                        <span class="px-3 py-1 rounded-full bg-gray-900 text-white text-sm">Từ khóa: @Model.SearchTerm</span>
-                    }
-                    @if (Model.SelectedCategoryId.HasValue)
-                    {
-                        var selectedCategory = Model.Categories.FirstOrDefault(c => c.CategoryId == Model.SelectedCategoryId);
-                        <span class="px-3 py-1 rounded-full bg-soft-blue text-white text-sm">Thể loại: @selectedCategory?.CategoryName</span>
-                    }
-                </div>
-            }
 
             @if (Model.FeaturedBooks.Any())
             {
@@ -318,52 +324,56 @@
                     @foreach (var book in Model.FeaturedBooks)
                     {
                         var availableCopies = book.BookCopies.Count(c => c.Status == "Available");
-                        <div class="group cursor-pointer">
+                        <div class="group cursor-pointer bg-white rounded-2xl-friendly p-4 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
                             <div class="relative aspect-[2/3] bg-gray-200 rounded-xl overflow-hidden mb-3">
-                                <img alt="@book.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://images.unsplash.com/photo-1543004629-142a2ccc5ef6?auto=format&fit=crop&q=80&w=400" />
-                                @if (book.Category != null)
+                                @if (Model.FavoriteBookIds.Contains(book.BookId))
                                 {
-                                    <span class="absolute top-3 left-3 bg-white/90 text-gray-700 px-2 py-1 rounded-full text-xs font-bold">@book.Category.CategoryName</span>
+                                    <span class="absolute top-3 right-3 z-10 bg-white/90 text-red-500 text-xs font-bold px-2 py-1 rounded-full">Yêu thích</span>
                                 }
+                                <img alt="@book.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://images.unsplash.com/photo-1543004629-142a2ccc5ef6?auto=format&fit=crop&q=80&w=400" />
                             </div>
-                            <h4 class="font-bold text-sm truncate">@book.Title</h4>
-                            <p class="text-xs text-gray-500">@book.Author</p>
-                            <p class="text-xs font-bold mt-1 @(availableCopies > 0 ? "text-fresh-green" : "text-red-500")">
-                                @(availableCopies > 0 ? $"Còn {availableCopies} bản" : "Hết sách")
-                            </p>
-                            <a href="/Books/Details?id=@book.BookId" class="block mt-2 w-full text-center py-1.5 bg-gray-100 hover:bg-sunny-yellow text-gray-700 text-xs font-bold rounded-lg transition-colors">Xem chi tiết</a>
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <h4 class="font-bold text-sm leading-6">@book.Title</h4>
+                                    <p class="text-xs text-gray-500">@book.Author</p>
+                                    <p class="text-xs text-gray-400 mt-1">@book.Category?.CategoryName</p>
+                                </div>
+                                <span class="text-[11px] font-bold px-2 py-1 rounded-full @(availableCopies > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600")">
+                                    @(availableCopies > 0 ? $"Còn {availableCopies}" : "Hết")
+                                </span>
+                            </div>
+                            <a href="/Books/Details?id=@book.BookId" class="block mt-4 w-full text-center py-2 bg-gray-100 hover:bg-sunny-yellow text-gray-700 text-sm font-bold rounded-lg transition-colors">Xem chi tiết</a>
                         </div>
                     }
                 </div>
             }
             else
             {
-                <div class="bg-white rounded-2xl-friendly border border-gray-100 p-12 text-center text-gray-500">
-                    <div class="text-5xl mb-4">🔎</div>
-                    <p class="font-bold text-lg text-gray-700">Không tìm thấy sách phù hợp</p>
-                    <p class="mt-2">Thử đổi từ khóa hoặc bỏ lọc thể loại để xem thêm kết quả.</p>
+                <div class="bg-white rounded-2xl-friendly border border-dashed border-gray-200 p-12 text-center">
+                    <p class="text-lg font-bold text-gray-700">Không có sách phù hợp với bộ lọc hiện tại.</p>
+                    <p class="text-sm text-gray-500 mt-2">Thử đổi từ khóa, thể loại hoặc sang trang Search để xem đầy đủ hơn.</p>
                 </div>
             }
         </section>
     </main>
 
-    <footer class="max-w-7xl mx-auto px-6 pb-12 mt-4" data-purpose="footer-stats">
+    <footer class="max-w-7xl mx-auto px-6 pb-12 mt-4">
         <div class="bg-white border-4 border-fresh-green rounded-2xl-friendly p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
             <div class="flex items-center gap-6">
                 <div class="w-16 h-16 bg-fresh-green/20 rounded-2xl flex items-center justify-center text-3xl">🏅</div>
                 <div>
-                    <h3 class="font-bold text-xl">Thành tích của @(greetingName.Split(' ').LastOrDefault() ?? "bạn")</h3>
-                    <p class="text-gray-500">Tiếp tục đọc đều để mở rộng tủ sách của bạn.</p>
+                    <h3 class="font-bold text-xl">Thành tích của @(Model.CurrentUser?.FullName?.Split(' ').LastOrDefault() ?? "bạn")</h3>
+                    <p class="text-gray-500">Cố gắng lên nhé, bạn đang làm rất tốt!</p>
                 </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full md:w-auto">
                 <div class="bg-gray-50 px-6 py-4 rounded-xl-friendly text-center border border-gray-100">
-                    <div class="text-2xl font-black text-soft-blue">@(Model.CurrentUser?.BorrowRecordStudents.Count ?? 0)</div>
+                    <div class="text-2xl font-black text-soft-blue">@Model.CurrentUser?.BorrowRecordStudents.Count</div>
                     <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Đã mượn</div>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 rounded-xl-friendly text-center border border-gray-100">
-                    <div class="text-2xl font-black text-soft-orange">@Model.Recommendations.Count</div>
-                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Đề xuất mới</div>
+                    <div class="text-2xl font-black text-soft-orange">@Model.FavoriteCount</div>
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Yêu thích</div>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 rounded-xl-friendly text-center border border-gray-100">
                     <div class="text-2xl font-black text-fresh-green">@Model.Categories.Count</div>
@@ -371,8 +381,8 @@
                 </div>
             </div>
             <div class="shrink-0">
-                <a asp-page="/Search" class="bg-fresh-green hover:bg-green-500 text-white px-8 py-3 rounded-xl-friendly font-bold shadow-lg transition-all inline-block">
-                    Xem thêm sách
+                <a class="bg-fresh-green hover:bg-green-500 text-white px-8 py-3 rounded-xl-friendly font-bold shadow-lg transition-all inline-block" href="/Search">
+                    Tìm thêm sách
                 </a>
             </div>
         </div>
@@ -388,25 +398,25 @@
             const profileBtn = document.getElementById('profile-btn');
             const profileDropdown = document.getElementById('profile-dropdown');
 
-            bell?.addEventListener('click', function (e) {
+            bell.addEventListener('click', function (e) {
                 e.stopPropagation();
                 notificationDropdown.classList.toggle('hidden');
                 profileDropdown.classList.add('hidden');
             });
 
-            profileBtn?.addEventListener('click', function (e) {
+            profileBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 profileDropdown.classList.toggle('hidden');
                 notificationDropdown.classList.add('hidden');
             });
 
             document.addEventListener('click', function (e) {
-                if (!bell?.contains(e.target) && !notificationDropdown?.contains(e.target)) {
-                    notificationDropdown?.classList.add('hidden');
+                if (!bell.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                    notificationDropdown.classList.add('hidden');
                 }
 
-                if (!profileBtn?.contains(e.target) && !profileDropdown?.contains(e.target)) {
-                    profileDropdown?.classList.add('hidden');
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
                 }
             });
         });

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
-using System.Security.Claims;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages
 {
@@ -23,25 +22,21 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public List<Category> Categories { get; set; } = new();
         public List<Book> FeaturedBooks { get; set; } = new();
         public string? UserClassName { get; set; }
+        public List<int> FavoriteBookIds { get; set; } = new();
+        public int FavoriteCount { get; set; }
         public string SearchTerm { get; set; } = string.Empty;
         public int? SelectedCategoryId { get; set; }
-        public int TotalMatchedBooks { get; set; }
-        public bool HasActiveFilters => !string.IsNullOrWhiteSpace(SearchTerm) || SelectedCategoryId.HasValue;
+        public string Availability { get; set; } = "all";
 
-        public async Task OnGetAsync(string? search, int? categoryId)
+        public async Task OnGetAsync(int? categoryId, string? search, string? availability)
         {
             SearchTerm = search?.Trim() ?? string.Empty;
             SelectedCategoryId = categoryId;
+            Availability = string.Equals(availability, "available", StringComparison.OrdinalIgnoreCase)
+                ? "available"
+                : "all";
 
-            var email = User.FindFirstValue(ClaimTypes.Email);
-
-            if (!string.IsNullOrWhiteSpace(email))
-            {
-                CurrentUser = await _context.Users
-                    .Include(u => u.ClassesNavigation)
-                    .Include(u => u.BorrowRecordStudents)
-                    .FirstOrDefaultAsync(u => u.Email == email);
-            }
+            CurrentUser = await LoadCurrentStudentAsync();
 
             if (CurrentUser != null)
             {
@@ -61,19 +56,18 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                     .OrderByDescending(r => r.CreatedAt)
                     .Take(2)
                     .ToListAsync();
-            }
-            else
-            {
-                Recommendations = await _context.TeacherRecommendations
-                    .Include(r => r.Book)
-                        .ThenInclude(b => b!.BookCopies)
-                    .Include(r => r.Teacher)
-                    .OrderByDescending(r => r.CreatedAt)
-                    .Take(2)
+
+                FavoriteBookIds = await _context.FavoriteBooks
+                    .Where(fb => fb.StudentId == CurrentUser.UserId)
+                    .Select(fb => fb.BookId)
                     .ToListAsync();
+
+                FavoriteCount = FavoriteBookIds.Count;
             }
 
-            Categories = await _context.Categories.ToListAsync();
+            Categories = await _context.Categories
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
 
             var booksQuery = _context.Books
                 .Include(b => b.Category)
@@ -90,16 +84,39 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                 booksQuery = booksQuery.Where(b =>
                     b.Title.Contains(SearchTerm) ||
                     (b.Author != null && b.Author.Contains(SearchTerm)) ||
-                    (b.Publisher != null && b.Publisher.Contains(SearchTerm)) ||
-                    (b.Isbn != null && b.Isbn.Contains(SearchTerm)));
+                    (b.Publisher != null && b.Publisher.Contains(SearchTerm)));
             }
 
-            TotalMatchedBooks = await booksQuery.CountAsync();
+            if (Availability == "available")
+            {
+                booksQuery = booksQuery.Where(b => b.BookCopies.Any(c => c.Status == "Available"));
+            }
 
             FeaturedBooks = await booksQuery
                 .OrderByDescending(b => b.BookId)
                 .Take(8)
                 .ToListAsync();
+        }
+
+        private async Task<User?> LoadCurrentStudentAsync()
+        {
+            if (User.Identity?.IsAuthenticated == true && User.IsInRole("Student"))
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    return await _context.Users
+                        .Include(u => u.ClassesNavigation)
+                        .Include(u => u.BorrowRecordStudents)
+                        .FirstOrDefaultAsync(u => u.Email == email);
+                }
+            }
+
+            return await _context.Users
+                .Include(u => u.ClassesNavigation)
+                .Include(u => u.BorrowRecordStudents)
+                .FirstOrDefaultAsync(u => u.RoleId == 1);
         }
     }
 }

@@ -1,0 +1,148 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.SearchModel
+@{
+    ViewData["Title"] = "Tìm kiếm sách";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sunny-yellow': '#FFD93D',
+                        'soft-orange': '#FF8400',
+                        'fresh-green': '#6BCB77',
+                        'soft-blue': '#4D96FF',
+                    },
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl-friendly': '24px',
+                        '2xl-friendly': '32px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFDF5;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold">Trang tìm kiếm sách</h1>
+                <p class="text-sm text-gray-500 mt-1">Tra cứu nhanh theo tên sách, tác giả, nhà xuất bản hoặc ISBN.</p>
+            </div>
+            <a asp-page="/Index" asp-route-search="@Model.SearchTerm" asp-route-categoryId="@Model.SelectedCategoryId" class="inline-flex items-center gap-2 text-gray-600 hover:text-soft-orange font-medium">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Về trang chủ
+            </a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-10">
+        <form method="get" asp-page="/Search" class="bg-white rounded-2xl-friendly border border-gray-100 shadow-sm p-5 md:p-6 grid gap-4 md:grid-cols-[1fr_240px_auto_auto]">
+            <div class="relative">
+                <input type="text" name="search" value="@Model.SearchTerm" placeholder="Nhập tên sách, tác giả, ISBN..." class="w-full pl-12 pr-4 py-3 rounded-full border-2 border-gray-100 focus:border-sunny-yellow focus:ring-0" />
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                </div>
+            </div>
+            <select name="categoryId" class="rounded-full border-2 border-gray-100 px-4 py-3 focus:border-sunny-yellow focus:ring-0">
+                <option value="">Tất cả thể loại</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.CategoryId" selected="@(Model.SelectedCategoryId == category.CategoryId)">@category.CategoryName</option>
+                }
+            </select>
+            <button type="submit" class="px-6 py-3 rounded-full bg-gray-900 text-white font-bold">Tìm kiếm</button>
+            <a asp-page="/Search" class="px-6 py-3 rounded-full bg-gray-100 text-gray-700 font-bold text-center">Làm mới</a>
+        </form>
+
+        <div class="mt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+                <h2 class="text-xl font-bold">Kết quả: @Model.TotalResults sách</h2>
+                <p class="text-sm text-gray-500 mt-1">Dùng trang này khi cần duyệt toàn bộ kết quả thay vì chỉ vài sách nổi bật ở Home.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                {
+                    <span class="px-3 py-1 rounded-full bg-gray-900 text-white text-sm">Từ khóa: @Model.SearchTerm</span>
+                }
+                @if (Model.SelectedCategoryId.HasValue)
+                {
+                    var selectedCategory = Model.Categories.FirstOrDefault(c => c.CategoryId == Model.SelectedCategoryId);
+                    <span class="px-3 py-1 rounded-full bg-soft-blue text-white text-sm">Thể loại: @selectedCategory?.CategoryName</span>
+                }
+            </div>
+        </div>
+
+        @if (Model.Books.Any())
+        {
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @foreach (var book in Model.Books)
+                {
+                    var availableCopies = book.BookCopies.Count(c => c.Status == "Available");
+                    <div class="bg-white rounded-2xl-friendly shadow-md hover:shadow-xl transition-shadow overflow-hidden flex flex-col">
+                        <div class="aspect-[3/4] bg-gray-100 relative overflow-hidden">
+                            <img alt="@book.Title" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" src="https://images.unsplash.com/photo-1544648151-0738d38e67f7?auto=format&fit=crop&q=80&w=400" />
+                            @if (book.Category != null)
+                            {
+                                <div class="absolute top-3 left-3 bg-soft-blue text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    @book.Category.CategoryName
+                                </div>
+                            }
+                            <div class="absolute top-3 right-3 @(availableCopies > 0 ? "bg-fresh-green" : "bg-red-400") text-white text-xs font-bold px-2 py-1 rounded-full">
+                                @availableCopies/@book.BookCopies.Count
+                            </div>
+                        </div>
+
+                        <div class="p-4 flex flex-col flex-1">
+                            <h2 class="font-bold text-base mb-1 line-clamp-2 leading-snug">@book.Title</h2>
+                            <p class="text-gray-500 text-sm mb-1">@book.Author</p>
+                            <p class="text-gray-400 text-xs mb-4">NXB: @(book.Publisher ?? "Chưa cập nhật") · @(book.PublishYear?.ToString() ?? "N/A")</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="inline-block w-2 h-2 rounded-full @(availableCopies > 0 ? "bg-fresh-green" : "bg-red-400")"></span>
+                                <span class="text-sm font-medium @(availableCopies > 0 ? "text-fresh-green" : "text-red-400")">
+                                    @(availableCopies > 0 ? $"Còn {availableCopies} bản có sẵn" : "Hết sách")
+                                </span>
+                            </div>
+                            <a href="/Books/Details?id=@book.BookId" class="mt-auto w-full text-center py-2.5 bg-gray-100 hover:bg-sunny-yellow text-gray-700 font-bold rounded-xl-friendly transition-colors">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="mt-10 bg-white rounded-2xl-friendly border border-gray-100 p-12 text-center text-gray-500">
+                <div class="text-5xl mb-4">🔎</div>
+                <p class="font-bold text-lg text-gray-700">Không tìm thấy sách phù hợp</p>
+                <p class="mt-2">Thử tìm bằng tác giả hoặc bỏ bớt bộ lọc để mở rộng kết quả.</p>
+            </div>
+        }
+    </main>
+</body>
+</html>

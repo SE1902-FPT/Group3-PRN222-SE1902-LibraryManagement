@@ -29,6 +29,9 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
         public int PendingCount { get; set; }
         public List<int> FavoriteBookIds { get; set; } = new();
         public Dictionary<int, string> BookRequestStatuses { get; set; } = new();
+        public string SearchTerm { get; set; } = string.Empty;
+        public int? SelectedCategoryId { get; set; }
+        public int TotalResults { get; set; }
 
         // OnGetAsync: Load danh sách sách và thông tin học sinh
         public async Task<IActionResult> OnGetAsync(int? categoryId, string? search)
@@ -50,6 +53,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
 
             var studentId = CurrentStudent.UserId;
             StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
+            SearchTerm = search?.Trim() ?? string.Empty;
+            SelectedCategoryId = categoryId;
 
             // Đếm số sách đang chờ duyệt
             PendingCount = await _context.BorrowRequests
@@ -88,8 +93,14 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
             if (categoryId.HasValue)
                 query = query.Where(b => b.CategoryId == categoryId.Value);
 
-            if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(b => b.Title.Contains(search) || (b.Author != null && b.Author.Contains(search)));
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
+                query = query.Where(b =>
+                    b.Title.Contains(SearchTerm) ||
+                    (b.Author != null && b.Author.Contains(SearchTerm)) ||
+                    (b.Publisher != null && b.Publisher.Contains(SearchTerm)) ||
+                    (b.Isbn != null && b.Isbn.Contains(SearchTerm)));
+
+            TotalResults = await query.CountAsync();
 
             Books = await query.OrderByDescending(b => b.BookId).ToListAsync();
 

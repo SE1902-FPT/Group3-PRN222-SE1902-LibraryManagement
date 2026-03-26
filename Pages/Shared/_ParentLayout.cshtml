@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] – Phụ Huynh | Thư Viện Nhí</title>
+    <!-- Tailwind CSS with Forms and Container Queries, matching Index -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Google Fonts: Lexend for a friendly, readable feel -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-purple': '#9B59B6', // keep for backward compatibility or swap out later
+                        'sunny-yellow': '#FFD93D',
+                        'soft-orange': '#FF8400',
+                        'fresh-green': '#6BCB77',
+                        'soft-blue': '#4D96FF',
+                    },
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl-friendly': '24px',
+                        '2xl-friendly': '32px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8F9FA; }
+        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 1.5rem; color: #475569; font-weight: 500; transition: all 0.3s; }
+        .sidebar-link:hover { background-color: rgba(77, 150, 255, 0.1); color: #4D96FF; }
+        .sidebar-link.active { background-color: rgba(77, 150, 255, 0.15); color: #4D96FF; font-weight: 600; }
+        .stat-card { background-color: white; border-radius: 1.5rem; padding: 1.25rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { min-width: 280px; max-width: 360px; background: #fff; border-left: 5px solid #4D96FF; border-radius: 24px; padding: 14px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); animation: slideIn 0.3s ease; }
+        @@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-title { font-weight: 600; color: #1e293b; margin-bottom: 4px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .toast-message { font-size: 0.85rem; color: #64748b; line-height: 1.4; }
+        .toast-icon { width: 20px; height: 20px; color: #4D96FF; }
+    </style>
+</head>
+<body class="antialiased text-slate-700">
+
+<div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-100 flex flex-col py-6 px-4 shrink-0 sticky top-0 h-screen">
+        <div class="px-6 py-6 border-b border-slate-100 flex items-center gap-3">
+            <div class="bg-sunny-yellow p-2 rounded-xl-friendly">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <span class="font-bold text-xl tracking-tight text-slate-800">Cổng Phụ Huynh</span>
+        </div>
+
+        <nav class="flex-1 space-y-1">
+            <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Parent/Dashboard") == true ? "active" : "")" href="/Parent/Dashboard">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                Tổng quan
+            </a>
+            <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Parent/Borrowing") == true ? "active" : "")" href="/Parent/Borrowing">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                Đang mượn
+            </a>
+            <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Parent/History") == true ? "active" : "")" href="/Parent/History">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                Lịch sử
+            </a>
+            <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Parent/Notifications") == true ? "active" : "")" href="/Parent/Notifications">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                Thông báo
+                @if (ViewData["UnreadCount"] is int count && count > 0)
+                {
+                    <span class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">@count</span>
+                }
+            </a>
+        </nav>
+
+        <div class="mt-auto pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-3 px-2">
+                <img class="w-10 h-10 rounded-full object-cover" src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "P")&background=4D96FF&color=fff" alt="avatar" />
+                <div class="overflow-hidden">
+                    <div class="text-sm font-semibold truncate">@User.Identity?.Name</div>
+                    <div class="text-xs text-slate-400">Phụ huynh</div>
+                </div>
+            </div>
+            <form method="post" action="/Logout" class="mt-3">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-xl-friendly transition-colors">
+                    Đăng xuất
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="flex-1 p-8">
+        @RenderBody()
+    </main>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- SignalR Client -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+    (function () {
+        const parentId = "@ViewData["ParentId"]";
+        if (!parentId) return;
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/parentNotifications")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveNotification", function (data) {
+            showToast(data.message, data.createdAt);
+            // Update unread badge if present
+            const badge = document.getElementById('unread-badge');
+            if (badge) {
+                let c = parseInt(badge.textContent || '0') + 1;
+                badge.textContent = c;
+                badge.classList.remove('hidden');
+            }
+        });
+
+        connection.start()
+            .then(() => connection.invoke("JoinParentGroup", parentId))
+            .catch(err => console.warn("SignalR connection failed:", err));
+
+        function showToast(message, time) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div style="font-size:13px;font-weight:600;color:#4D96FF;margin-bottom:4px;">🔔 Thông báo mới</div>
+                <div style="font-size:13px;color:#334155;">${message}</div>
+                ${time ? `<div style="font-size:11px;color:#94a3b8;margin-top:6px;">${time}</div>` : ''}
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 6000);
+        }
+    })();
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

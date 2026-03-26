@@ -1,0 +1,78 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Parent.NotificationsModel
+@{
+    ViewData["Title"] = "Thông báo";
+    Layout = "~/Pages/Shared/_ParentLayout.cshtml";
+    ViewData["ParentId"] = Model.ParentUserId;
+    ViewData["UnreadCount"] = Model.UnreadNotificationsCount;
+}
+
+<div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-800">Thông báo của bạn</h1>
+        <p class="text-slate-500 mt-1">Cập nhật ngay tình hình mượn trả sách của các con.</p>
+    </div>
+    
+    @if (Model.Notifications.Any(n => n.IsRead == false))
+    {
+        <form method="post" asp-page-handler="MarkAllRead">
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-soft-blue text-white text-sm font-bold rounded-xl-friendly hover:bg-blue-600 transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Đánh dấu tất cả đã đọc
+            </button>
+        </form>
+    }
+</div>
+
+<div class="bg-white rounded-2xl-friendly shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-100">
+    @if (Model.Notifications.Any())
+    {
+        @foreach (var notif in Model.Notifications)
+        {
+            var bgClass = notif.IsRead == true ? "bg-white" : "bg-soft-blue/5";
+            var textClass = notif.IsRead == true ? "text-slate-500" : "text-slate-800 font-bold";
+            
+            <div class="p-5 flex items-start gap-4 transition-colors hover:bg-slate-50 @bgClass">
+                <div class="shrink-0 mt-1">
+                    @if (notif.IsRead == true)
+                    {
+                        <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="w-10 h-10 rounded-full bg-soft-blue text-white flex items-center justify-center shadow-lg shadow-soft-blue/30">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        </div>
+                    }
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm md:text-base leading-relaxed @textClass">
+                        @notif.Message
+                    </p>
+                    <p class="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        @notif.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                    </p>
+                </div>
+                @if (notif.IsRead == false)
+                {
+                    <form method="post" asp-page-handler="MarkRead" class="shrink-0 ml-4">
+                        <input type="hidden" name="id" value="@notif.NotificationId" />
+                        <button type="submit" class="text-xs font-bold text-soft-blue hover:underline bg-soft-blue/10 px-3 py-1.5 rounded-lg" title="Đánh dấu đã đọc">
+                            Đã đọc
+                        </button>
+                    </form>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="p-16 text-center text-slate-400">
+            <svg class="w-16 h-16 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <p class="text-lg font-medium">Bạn chưa có thông báo nào.</p>
+        </div>
+    }
+</div>

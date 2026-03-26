@@ -1,4 +1,6 @@
+using Group3_SE1902_PRN222_LibraryManagement.Hubs;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Group3_SE1902_PRN222_LibraryManagement.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +45,15 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             builder.Services.AddDbContext<ThuVienContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ThuvienDB")));
 
+            // SignalR
+            builder.Services.AddSignalR();
+
+            // Notification service (scoped – one per request / scope)
+            builder.Services.AddScoped<NotificationService>();
+
+            // Overdue background job (singleton IHostedService)
+            builder.Services.AddHostedService<OverdueCheckJob>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -59,6 +70,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             app.UseAuthorization();
 
             app.MapRazorPages();
+            app.MapHub<ParentNotificationHub>("/hubs/parentNotifications");
 
             app.Run();
         }

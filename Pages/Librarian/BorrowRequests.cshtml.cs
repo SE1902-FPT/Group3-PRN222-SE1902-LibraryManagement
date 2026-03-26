@@ -22,6 +22,12 @@ public class BorrowRequestsModel : PageModel
     public string? LibrarianName { get; set; }
     public string? ErrorMessage { get; set; }
 
+    [TempData]
+    public string? ToastMessage { get; set; }
+
+    [TempData]
+    public string? ToastType { get; set; } // "success" | "danger"
+
     public List<BorrowRequestRow> PendingRequests { get; set; } = new();
 
     public class BorrowRequestRow
@@ -139,6 +145,8 @@ public class BorrowRequestsModel : PageModel
         await _context.SaveChangesAsync();
         await tx.CommitAsync();
 
+        ToastType = "success";
+        ToastMessage = "Yêu cầu mượn sách đã được duyệt.";
         return RedirectToPage("/Librarian/BorrowRequests", new { librarianId = LibrarianId });
     }
 
@@ -171,6 +179,8 @@ public class BorrowRequestsModel : PageModel
         request.ApprovedBy = LibrarianId;
         await _context.SaveChangesAsync();
 
+        ToastType = "danger";
+        ToastMessage = "Đã từ chối yêu cầu mượn sách.";
         return RedirectToPage("/Librarian/BorrowRequests", new { librarianId = LibrarianId });
     }
 

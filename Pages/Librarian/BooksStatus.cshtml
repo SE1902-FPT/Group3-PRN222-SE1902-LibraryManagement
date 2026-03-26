@@ -35,9 +35,13 @@
         <table class="table table-bordered align-middle">
             <thead>
                 <tr>
+                    <th style="width: 76px;">Ảnh</th>
                     <th>Sách</th>
                     <th>Thể loại</th>
                     <th>Tác giả</th>
+                    <th>ISBN</th>
+                    <th>NXB</th>
+                    <th>Năm</th>
                     <th>Sẵn có</th>
                     <th>Đang mượn</th>
                     <th>Tổng</th>
@@ -47,7 +51,7 @@
                 @if (Model.BookRows.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" class="text-center text-muted">Không có sách phù hợp.</td>
+                        <td colspan="10" class="text-center text-muted">Không có sách phù hợp.</td>
                     </tr>
                 }
                 else
@@ -56,10 +60,31 @@
                     {
                         <tr>
                             <td>
+                                @if (!string.IsNullOrWhiteSpace(b.ImageUrl))
+                                {
+                                    <img src="@b.ImageUrl"
+                                         alt="@b.Title"
+                                         style="width: 56px; height: 72px; object-fit: cover; border-radius: 6px;"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    <div style="width:56px;height:72px;display:none;align-items:center;justify-content:center;border:1px dashed #ccc;border-radius:6px;color:#999;font-size:12px;">
+                                        No image
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div style="width:56px;height:72px;display:flex;align-items:center;justify-content:center;border:1px dashed #ccc;border-radius:6px;color:#999;font-size:12px;">
+                                        No image
+                                    </div>
+                                }
+                            </td>
+                            <td>
                                 <div class="fw-semibold">@b.Title</div>
                             </td>
                             <td>@b.CategoryName</td>
                             <td>@b.Author</td>
+                            <td>@(string.IsNullOrWhiteSpace(b.Isbn) ? "-" : b.Isbn)</td>
+                            <td>@(string.IsNullOrWhiteSpace(b.Publisher) ? "-" : b.Publisher)</td>
+                            <td>@(b.PublishYear?.ToString() ?? "-")</td>
                             <td>
                                 <span class="badge bg-success">@b.AvailableCount</span>
                             </td>

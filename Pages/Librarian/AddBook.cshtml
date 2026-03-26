@@ -22,7 +22,7 @@
         </div>
     }
 
-    <form method="post" class="card p-3">
+    <form method="post" enctype="multipart/form-data" class="card p-3">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Tên sách *</label>
@@ -31,6 +31,16 @@
             <div class="col-md-6">
                 <label class="form-label">Tác giả</label>
                 <input class="form-control" name="input.Author" maxlength="100" value="@Model.Input.Author" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">ISBN</label>
+                <input class="form-control" name="input.Isbn" maxlength="20" value="@Model.Input.Isbn" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Chọn ảnh</label>
+                <input class="form-control" type="file" name="UploadImage" accept="image/*" />
+
             </div>
 
             <div class="col-md-4">
@@ -63,7 +73,10 @@
             </div>
 
             <div class="col-md-6 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Tạo sách</button>
+                <div class="d-flex gap-2 w-100">
+                    <button type="submit" class="btn btn-primary flex-fill">Tạo sách</button>
+                    <a class="btn btn-danger flex-fill" href="/Librarian/LibrarianDashboard">Hủy</a>
+                </div>
             </div>
         </div>
     </form>

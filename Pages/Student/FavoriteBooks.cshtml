@@ -45,46 +45,71 @@
     <!-- Navbar -->
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2 shrink-0">
+            <!-- Logo → Homepage -->
+            <a href="/" class="flex items-center gap-2 shrink-0">
                 <div class="bg-sunny-yellow p-2 rounded-xl-friendly">
                     <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </div>
                 <span class="font-bold text-xl tracking-tight hidden md:block">Thư Viện Nhí</span>
-            </div>
+            </a>
 
             <div class="flex items-center gap-4">
+                <!-- Badge số sách đang mượn -->
                 <div class="flex items-center gap-2 bg-soft-orange/10 px-4 py-2 rounded-xl-friendly">
                     <svg class="h-5 w-5 text-soft-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z"></path>
                     </svg>
-                    <span class="text-soft-orange font-bold text-sm">@Model.PendingCount / 5 yêu cầu chờ duyệt</span>
+                    <span class="text-soft-orange font-bold text-sm">@Model.PendingCount / 5 sách đang mượn</span>
                 </div>
 
-                <div class="hidden md:flex items-center gap-2">
-                    <div class="w-8 h-8 bg-sunny-yellow rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        @(Model.CurrentStudent?.FullName?.FirstOrDefault() ?? 'S')
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-bold leading-tight">@Model.CurrentStudent?.FullName</p>
-                        <p class="text-xs text-gray-500">Lớp @Model.StudentClassName</p>
-                    </div>
-                </div>
-
-                <a href="/Student/Book" class="flex items-center gap-2 text-gray-600 hover:text-soft-blue transition-colors font-medium">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                <!-- Trang chủ (visible ngoài) -->
+                <a href="/" class="flex items-center gap-1.5 text-gray-600 hover:text-soft-orange transition-colors font-medium">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                     </svg>
-                    <span class="hidden sm:block">Danh sách sách</span>
+                    <span class="hidden sm:block">Trang chủ</span>
                 </a>
 
-                <a href="/" class="flex items-center gap-2 text-gray-600 hover:text-soft-orange transition-colors">
+                <!-- Nút Quay lại (visible ngoài) -->
+                <a href="/Student/Book" class="flex items-center gap-1.5 text-gray-600 hover:text-soft-orange transition-colors font-medium">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                     </svg>
-                    <span class="font-medium hidden sm:block">Trang chủ</span>
+                    <span class="hidden sm:block">Mượn sách</span>
                 </a>
+
+                <!-- Profile Dropdown -->
+                <div class="relative" id="profile-wrapper">
+                    <button id="profile-btn" class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 hover:border-sunny-yellow transition-all">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-bold leading-none">@Model.CurrentStudent?.FullName</div>
+                            <div class="text-[10px] text-gray-500 font-medium tracking-wider uppercase">Lớp @Model.StudentClassName</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-soft-orange border-2 border-white overflow-hidden shrink-0">
+                            <img alt="Avatar" class="w-full h-full object-cover"
+                                 src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(Model.CurrentStudent?.FullName ?? "S")&background=FF8400&color=fff" />
+                        </div>
+                        <svg class="h-4 w-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 hidden z-50 overflow-hidden">
+                        <a href="/Student/Book" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                            <svg class="h-5 w-5 text-soft-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Mượn sách</span>
+                        </a>
+                        <a href="/Logout" class="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors group">
+                            <svg class="h-5 w-5 text-gray-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-red-500">Đăng xuất</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -337,6 +362,21 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
+
+        // Profile dropdown
+        document.addEventListener('DOMContentLoaded', function () {
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            profileBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+            document.addEventListener('click', function (e) {
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+        });
     </script>
 </body>
 </html>

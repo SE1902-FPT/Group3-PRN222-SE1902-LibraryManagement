@@ -35,7 +35,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
         {
             if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
             {
-                return NotFound();
+                return RedirectToPage("/Login", new { error = "access_denied" });
             }
 
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
@@ -46,7 +46,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
                 .FirstOrDefaultAsync(u => u.Email == email);
 
             if (CurrentStudent == null)
-                return NotFound();
+                return RedirectToPage("/Login", new { error = "access_denied" });
 
             var studentId = CurrentStudent.UserId;
             StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";

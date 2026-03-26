@@ -45,14 +45,14 @@
     <!-- Navbar -->
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2 shrink-0">
+            <a href="/" class="flex items-center gap-2 shrink-0">
                 <div class="bg-sunny-yellow p-2 rounded-xl-friendly">
                     <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </div>
                 <span class="font-bold text-xl tracking-tight hidden md:block">Thư Viện Nhí</span>
-            </div>
+            </a>
 
             <div class="flex items-center gap-4">
                 <!-- Badge số sách đang mượn -->
@@ -63,31 +63,46 @@
                     <span class="text-soft-orange font-bold text-sm">@Model.PendingCount / 5 sách đang mượn</span>
                 </div>
 
-                <!-- Thông tin học sinh -->
-                <div class="hidden md:flex items-center gap-2">
-                    <div class="w-8 h-8 bg-sunny-yellow rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        @(Model.CurrentStudent?.FullName?.FirstOrDefault() ?? 'S')
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-bold leading-tight">@Model.CurrentStudent?.FullName</p>
-                        <p class="text-xs text-gray-500">Lớp @Model.StudentClassName</p>
+                <!-- Trang chủ (visible ngoài) -->
+                <a href="/" class="flex items-center gap-1.5 text-gray-600 hover:text-soft-orange transition-colors font-medium">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="hidden sm:block">Trang chủ</span>
+                </a>
+
+                <!-- Profile Dropdown -->
+                <div class="relative" id="profile-wrapper">
+                    <button id="profile-btn" class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 hover:border-sunny-yellow transition-all">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-bold leading-none">@Model.CurrentStudent?.FullName</div>
+                            <div class="text-[10px] text-gray-500 font-medium tracking-wider uppercase">Lớp @Model.StudentClassName</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-soft-orange border-2 border-white overflow-hidden shrink-0">
+                            <img alt="Avatar" class="w-full h-full object-cover"
+                                 src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(Model.CurrentStudent?.FullName ?? "S")&background=FF8400&color=fff" />
+                        </div>
+                        <svg class="h-4 w-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <!-- Dropdown -->
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 hidden z-50 overflow-hidden">
+                        <a href="/Student/FavoriteBooks" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Sách yêu thích</span>
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="/Logout" class="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors group">
+                            <svg class="h-5 w-5 text-gray-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-red-500">Đăng xuất</span>
+                        </a>
                     </div>
                 </div>
-
-                <!-- Nút Sách yêu thích -->
-                <a href="/Student/FavoriteBooks" class="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors font-medium">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span class="hidden sm:block">Sách yêu thích</span>
-                </a>
-
-                <a href="/" class="flex items-center gap-2 text-gray-600 hover:text-soft-orange transition-colors">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    <span class="font-medium hidden sm:block">Trang chủ</span>
-                </a>
             </div>
         </div>
     </nav>
@@ -129,8 +144,8 @@
         }
 
         <!-- Thanh tìm kiếm + lọc danh mục -->
-        <form method="get" class="mb-8 flex flex-col sm:flex-row gap-4">
-            <div class="flex-1 relative">
+        <form method="get" class="mb-8 flex flex-col sm:flex-row flex-wrap gap-3">
+            <div class="flex-1 min-w-0 relative">
                 <svg class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
@@ -138,7 +153,7 @@
                        placeholder="Tìm kiếm tên sách hoặc tác giả..."
                        class="w-full pl-12 pr-4 py-3 rounded-xl-friendly border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sunny-yellow transition-all" />
             </div>
-            <select name="categoryId" class="px-4 py-3 rounded-xl-friendly border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sunny-yellow font-medium">
+            <select name="categoryId" class="w-full sm:w-auto min-w-[180px] px-4 py-3 rounded-xl-friendly border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sunny-yellow font-medium shrink-0">
                 <option value="">Tất cả danh mục</option>
                 @foreach (var cat in Model.Categories)
                 {
@@ -146,7 +161,7 @@
                     <option value="@cat.CategoryId" selected="@(selected == "selected")">@cat.CategoryName</option>
                 }
             </select>
-            <button type="submit" class="px-6 py-3 bg-sunny-yellow hover:bg-yellow-400 text-gray-800 font-bold rounded-xl-friendly transition-colors">
+            <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-sunny-yellow hover:bg-yellow-400 text-gray-800 font-bold rounded-xl-friendly transition-colors shrink-0">
                 Tìm kiếm
             </button>
         </form>
@@ -243,7 +258,7 @@
                                 else if (Model.PendingCount >= 5)
                                 {
                                     <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-400 font-bold rounded-xl-friendly text-sm cursor-not-allowed">
-                                        Đã đủ 5 yêu cầu
+                                        Đã đủ 5 quyển
                                     </button>
                                 }
                                 else
@@ -373,6 +388,23 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
+
+        // Profile dropdown
+        document.addEventListener('DOMContentLoaded', function () {
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+
+            profileBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+        });
     </script>
 </body>
 </html>

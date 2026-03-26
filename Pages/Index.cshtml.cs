@@ -23,13 +23,19 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public List<Book> FeaturedBooks { get; set; } = new();
         public string? UserClassName { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            // For demo purposes, we fetch the first student if no session exists
-            // In a real app, you would get this from the logged-in user's identity
+            // Chỉ Student mới được vào Homepage
+            if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
+            {
+                return RedirectToPage("/Login");
+            }
+
+            // Lấy user từ email trong Cookie Claims
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
             CurrentUser = await _context.Users
                 .Include(u => u.ClassesNavigation)
-                .FirstOrDefaultAsync(u => u.RoleId == 3); // Assuming 3 is Student role
+                .FirstOrDefaultAsync(u => u.Email == email);
 
             if (CurrentUser != null)
             {
@@ -58,6 +64,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                 .OrderByDescending(b => b.BookId)
                 .Take(5)
                 .ToListAsync();
+
+            return Page();
         }
     }
 }

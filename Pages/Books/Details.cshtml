@@ -45,20 +45,71 @@
 <body class="antialiased text-gray-800">
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-6 py-4">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2 shrink-0">
+            <!-- Logo → Homepage -->
+            <a href="/" class="flex items-center gap-2 shrink-0">
                 <div class="bg-sunny-yellow p-2 rounded-xl-friendly">
                     <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </div>
                 <span class="font-bold text-xl tracking-tight hidden md:block">Thư Viện Nhí</span>
-            </div>
-            <a href="/" class="flex items-center gap-2 text-gray-600 hover:text-soft-orange transition-colors">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                <span class="font-medium">Quay lại</span>
             </a>
+
+            <div class="flex items-center gap-4">
+                <!-- Trang chủ (visible ngoài) -->
+                <a href="/" class="flex items-center gap-1.5 text-gray-600 hover:text-soft-orange transition-colors font-medium">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="hidden sm:block">Trang chủ</span>
+                </a>
+                <!-- Nút Quay lại (visible ngoài) -->
+                <a href="/Student/Book" class="flex items-center gap-1.5 text-gray-600 hover:text-soft-orange transition-colors font-medium">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span class="hidden sm:block">Quay lại</span>
+                </a>
+
+                <!-- Profile Dropdown -->
+                <div class="relative" id="profile-wrapper">
+                    <button id="profile-btn" class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 hover:border-sunny-yellow transition-all">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-bold leading-none">@Model.CurrentStudent?.FullName</div>
+                            <div class="text-[10px] text-gray-500 font-medium tracking-wider uppercase">Lớp @Model.StudentClassName</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-soft-orange border-2 border-white overflow-hidden shrink-0">
+                            <img alt="Avatar" class="w-full h-full object-cover"
+                                 src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(Model.CurrentStudent?.FullName ?? "S")&background=FF8400&color=fff" />
+                        </div>
+                        <svg class="h-4 w-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 hidden z-50 overflow-hidden">
+                        <a href="/Student/Book" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                            <svg class="h-5 w-5 text-soft-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Mượn sách</span>
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="/Student/FavoriteBooks" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Sách yêu thích</span>
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="/Logout" class="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors group">
+                            <svg class="h-5 w-5 text-gray-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700 group-hover:text-red-500">Đăng xuất</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -146,29 +197,43 @@
                         </div>
                     }
 
+                    @{
+                        var firstAvailableCopy = Model.Book.BookCopies.FirstOrDefault(c => c.Status == "Available");
+                        var bookId = Model.Book.BookId;
+                    }
                     <div class="flex gap-4">
-                        @if (Model.IsRequested)
+                        @if (Model.BookRequestStatuses.ContainsKey(bookId))
                         {
-                            <button class="px-8 py-3 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly cursor-not-allowed border border-gray-300 shadow-sm" disabled>
-                                Đã đăng ký
-                            </button>
+                            var status = Model.BookRequestStatuses[bookId];
+                            if (status == "Approved" || status == "Borrowed")
+                            {
+                                <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
+                                    Đã được mượn
+                                </button>
+                            }
+                            else
+                            {
+                                <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
+                                    Đã đăng ký
+                                </button>
+                            }
                         }
-                        else if (Model.AvailableCopies > 0 && Model.PendingCount < 5)
+                        else if (firstAvailableCopy != null && Model.PendingCount < 5)
                         {
-                            var firstAvailable = Model.Book.BookCopies.FirstOrDefault(c => c.Status == "Available");
-                            <button onclick="openBorrowModal(@firstAvailable?.CopyId, '@Html.Raw(Model.Book.Title.Replace("'", "\\'"))')" class="px-8 py-3 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly transition-all shadow-lg">
-                                Đăng ký mượn
+                            <button type="button" onclick="openBorrowModal(@firstAvailableCopy.CopyId, '@Html.Raw(Model.Book.Title.Replace("'", "\\'"))')"
+                                    class="w-full py-2.5 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly text-sm transition-colors flex-1">
+                                Mượn sách
                             </button>
                         }
                         else if (Model.PendingCount >= 5)
                         {
-                            <button class="px-8 py-3 bg-gray-300 text-gray-600 font-bold rounded-xl-friendly cursor-not-allowed" disabled>
-                                Đã đủ 5 sách
+                            <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-400 font-bold rounded-xl-friendly text-sm cursor-not-allowed">
+                                Đã đủ 5 yêu cầu
                             </button>
                         }
                         else
                         {
-                            <button class="px-8 py-3 bg-gray-300 text-gray-600 font-bold rounded-xl-friendly cursor-not-allowed" disabled>
+                            <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-400 font-bold rounded-xl-friendly text-sm cursor-not-allowed">
                                 Hết sách
                             </button>
                         }
@@ -279,6 +344,21 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
+
+        // Profile dropdown
+        document.addEventListener('DOMContentLoaded', function () {
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            profileBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+            document.addEventListener('click', function (e) {
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+        });
     </script>
 </body>
 </html>

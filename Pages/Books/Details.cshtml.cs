@@ -1,7 +1,8 @@
+using Azure.Core;
+using Group3_SE1902_PRN222_LibraryManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Group3_SE1902_PRN222_LibraryManagement.Models;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 {
@@ -16,6 +17,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 
         public Book Book { get; set; } = null!;
         public List<TeacherRecommendation> TeacherRecommendations { get; set; } = new();
+
+        public Dictionary<int, string> BookRequestStatuses { get; set; } = new();
         public int AvailableCopies { get; set; }
 
         public User? CurrentStudent { get; set; }
@@ -68,15 +71,31 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
                 StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
 
                 PendingCount = await _context.BorrowRequests
-                    .CountAsync(r => r.StudentId == studentId && r.Status == "Pending");
+                    .CountAsync(r => r.StudentId == studentId &&
+                                    (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
 
                 IsFavorite = await _context.FavoriteBooks
                     .AnyAsync(fb => fb.StudentId == studentId && fb.BookId == id.Value);
 
                 IsRequested = await _context.BorrowRequests
                     .Include(r => r.Copy)
-                    .AnyAsync(r => r.StudentId == studentId && r.Copy != null && r.Copy.BookId == id.Value && 
+                    .AnyAsync(r => r.StudentId == studentId && r.Copy != null && r.Copy.BookId == id.Value &&
                                   (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
+
+                // lấy trạng thái chi tiết của yêu cầu mượn sách này
+                if (IsRequested)
+                {
+                    var activeRequests = await _context.BorrowRequests
+                        .Include(r => r.Copy)
+                        .Where(r => r.StudentId == studentId && r.Copy != null && r.Copy.BookId == id.Value &&
+                                    (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"))
+                        .ToListAsync();
+
+                    // Ưu tiên: Borrowed > Approved > Pending
+                    string resolvedStatus = activeRequests.Any(r => r.Status == "Borrowed") ? "Borrowed" :
+                                           activeRequests.Any(r => r.Status == "Approved") ? "Approved" : "Pending";
+                    BookRequestStatuses[id.Value] = resolvedStatus;
+                }
             }
 
             TeacherRecommendations = await _context.TeacherRecommendations
@@ -114,7 +133,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
                     BookId = bookId,
                     CreatedAt = DateTime.Now
                 });
-                Message = "Đã thêm sách vào danh sách yêu thích ❤️";
+                Message = "Đã thêm sách vào danh sách yêu thích";
             }
             
             MessageType = "success";
@@ -181,7 +200,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
             _context.BorrowRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            Message = $"✅ Đăng ký mượn cuốn \"{copy.Book.Title}\" thành công! Ngày dự kiến trả: {expectedReturnDate:dd/MM/yyyy}";
+            Message = $"Đăng ký mượn cuốn \"{copy.Book.Title}\" thành công! Ngày dự kiến trả: {expectedReturnDate:dd/MM/yyyy}";
             MessageType = "success";
             return RedirectToPage(new { id = bookId });
         }

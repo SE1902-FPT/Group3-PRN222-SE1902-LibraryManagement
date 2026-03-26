@@ -18,7 +18,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public string ErrorMessage { get; set; }
 
         // Chuỗi kết nối Database của bạn
-        private readonly string connectionString = @"Server=DESKTOP-Q602A7J;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
+        private readonly string connectionString = @"Server=localhost\SQLEXPRESS;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
 
         public void OnGet()
         {
@@ -97,7 +97,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                                     return RedirectToPage("/ParentDashboard"); // Chuyển đến trang của Phụ huynh
 
                                 case "Student":
-                                    return RedirectToPage("/StudentDashboard"); // Chuyển đến trang của Học sinh
+                                    return RedirectToPage("/index"); // Chuyển đến trang của Học sinh
 
                                 default:
                                     // Đề phòng trường hợp lỗi hoặc có quyền lạ chưa được định nghĩa

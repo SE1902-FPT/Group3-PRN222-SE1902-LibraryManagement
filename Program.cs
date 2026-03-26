@@ -27,13 +27,13 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             OnRedirectToLogin = context =>
             {
                 var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
-                context.Response.Redirect($"/Login?error=login_required&returnUrl={Uri.EscapeDataString(returnUrl)}");
+                context.Response.Redirect($"/Error?error=login_required&returnUrl={Uri.EscapeDataString(returnUrl)}");
                 return Task.CompletedTask;
             },
             OnRedirectToAccessDenied = context =>
             {
                 var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
-                context.Response.Redirect($"/Login?error=access_denied&returnUrl={Uri.EscapeDataString(returnUrl)}");
+                context.Response.Redirect($"/Error?error=access_denied&returnUrl={Uri.EscapeDataString(returnUrl)}");
                 return Task.CompletedTask;
             }
         };

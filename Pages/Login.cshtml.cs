@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
@@ -9,6 +9,13 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
 {
     public class LoginModel : PageModel
     {
+        private readonly IConfiguration _configuration;
+
+        public LoginModel(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         [BindProperty]
         public string Email { get; set; } = string.Empty;
 
@@ -16,9 +23,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public string Password { get; set; } = string.Empty;
 
         public string? ErrorMessage { get; set; }
-
-        // Chuỗi kết nối Database của bạn
-        private readonly string connectionString = @"Server=DESKTOP-9CCGUJS\SQLEXPRESS01;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
 
         public void OnGet()
         {
@@ -35,11 +39,21 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid) return Page();
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            var connectionString = _configuration.GetConnectionString("ThuvienDB");
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                ErrorMessage = "Chưa cấu hình chuỗi kết nối cơ sở dữ liệu.";
+                return Page();
+            }
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string query = "SELECT UserID, FullName, RoleID, Status FROM [Thu_vien].[dbo].[Users] WHERE Email = @Email AND PasswordHash = @Password";
+                const string query = "SELECT UserID, FullName, RoleID, Status FROM [Thu_vien].[dbo].[Users] WHERE Email = @Email AND PasswordHash = @Password";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@Email", Email);
@@ -59,68 +73,53 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
 
                             var fullName = reader["FullName"]?.ToString() ?? string.Empty;
                             int roleId = Convert.ToInt32(reader["RoleID"]);
-
-                            // Chuyển RoleID thành Tên Quyền để dễ quản lý trong ASP.NET
                             string roleName = GetRoleName(roleId);
 
-                            // 1. Tạo danh sách các thông tin (Claims) của người dùng
                             var claims = new List<Claim>
                             {
                                 new Claim(ClaimTypes.Name, fullName),
                                 new Claim(ClaimTypes.Email, Email),
-                                new Claim(ClaimTypes.Role, roleName) // Đây là phần quan trọng nhất để phân quyền
+                                new Claim(ClaimTypes.Role, roleName)
                             };
 
-                            // 2. Tạo Identity và Principal
                             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                            var authProperties = new AuthenticationProperties { IsPersistent = true }; // Ghi nhớ đăng nhập
+                            var authProperties = new AuthenticationProperties { IsPersistent = true };
 
-                            // 3. Đăng nhập (Lưu Cookie)
                             await HttpContext.SignInAsync(
                                 CookieAuthenticationDefaults.AuthenticationScheme,
                                 new ClaimsPrincipal(claimsIdentity),
                                 authProperties);
 
-                            // 4. Điều hướng sau khi đăng nhập thành công
                             switch (roleName)
                             {
                                 case "Admin":
-                                    return RedirectToPage("/AdminDashboard"); // Chuyển đến trang của Quản trị viên
-
+                                    return RedirectToPage("/AdminDashboard");
                                 case "Librarian":
-                                    return RedirectToPage("/Librarian/Libralian_Dashboard"); // Chuyển đến trang của Thủ thư
-
+                                    return RedirectToPage("/Librarian/Libralian_Dashboard");
                                 case "Teacher":
-                                    return RedirectToPage("/TeacherDashboard"); // Chuyển đến trang của Giáo viên
-
+                                    return RedirectToPage("/TeacherDashboard");
                                 case "Parent":
-                                    return RedirectToPage("/ParentDashboard"); // Chuyển đến trang của Phụ huynh
-
+                                    return RedirectToPage("/ParentDashboard");
                                 case "Student":
-                                    return RedirectToPage("/StudentDashboard"); // Chuyển đến trang của Học sinh
-
+                                    return RedirectToPage("/StudentDashboard");
                                 default:
-                                    // Đề phòng trường hợp lỗi hoặc có quyền lạ chưa được định nghĩa
                                     return RedirectToPage("/Index");
                             }
                         }
-                        else
-                        {
-                            ErrorMessage = "Email hoặc mật khẩu không đúng!";
-                            return Page();
-                        }
+
+                        ErrorMessage = "Email hoặc mật khẩu không đúng!";
+                        return Page();
                     }
                 }
             }
         }
 
-        // Hàm phụ trợ chuyển RoleID thành chuỗi
         private string GetRoleName(int roleId)
         {
             return roleId switch
             {
                 5 => "Admin",
-                4 => "Librarian", // Thủ thư
+                4 => "Librarian",
                 3 => "Teacher",
                 1 => "Student",
                 2 => "Parent",
@@ -129,4 +128,3 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         }
     }
 }
-

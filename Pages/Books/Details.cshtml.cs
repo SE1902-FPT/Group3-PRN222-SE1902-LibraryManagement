@@ -23,6 +23,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
         public int PendingCount { get; set; }
         public bool IsFavorite { get; set; }
         public bool IsRequested { get; set; }
+        public bool IsStudentView { get; set; }
+        public bool IsTeacherView { get; set; }
 
         [TempData]
         public string? Message { get; set; }
@@ -49,35 +51,36 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 
             AvailableCopies = Book.BookCopies.Count(c => c.Status == "Available");
 
-            if (User.Identity?.IsAuthenticated != true || !User.IsInRole("Student"))
+            IsStudentView = User.Identity?.IsAuthenticated == true && User.IsInRole("Student");
+            IsTeacherView = User.Identity?.IsAuthenticated == true && User.IsInRole("Teacher");
+
+            if (IsStudentView)
             {
-                return NotFound();
-            }
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                CurrentStudent = await _context.Users
+                    .Include(u => u.ClassesNavigation)
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Email == email);
 
-            CurrentStudent = await _context.Users
-                .Include(u => u.ClassesNavigation)
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Email == email);
+                if (CurrentStudent != null)
+                {
+                    var studentId = CurrentStudent.UserId;
+                    StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
 
-            if (CurrentStudent != null)
-            {
-                var studentId = CurrentStudent.UserId;
-                StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
+                    PendingCount = await _context.BorrowRequests
+                        .CountAsync(r => r.StudentId == studentId && r.Status == "Pending");
 
-                PendingCount = await _context.BorrowRequests
-                    .CountAsync(r => r.StudentId == studentId && r.Status == "Pending");
+                    IsFavorite = await _context.FavoriteBooks
+                        .AnyAsync(fb => fb.StudentId == studentId && fb.BookId == id);
 
-                IsFavorite = await _context.FavoriteBooks
-                    .AnyAsync(fb => fb.StudentId == studentId && fb.BookId == id);
-
-                IsRequested = await _context.BorrowRequests
-                    .Include(r => r.Copy)
-                    .AnyAsync(r => r.StudentId == studentId &&
-                                   r.Copy != null &&
-                                   r.Copy.BookId == id &&
-                                   (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
+                    IsRequested = await _context.BorrowRequests
+                        .Include(r => r.Copy)
+                        .AnyAsync(r => r.StudentId == studentId &&
+                                       r.Copy != null &&
+                                       r.Copy.BookId == id &&
+                                       (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
+                }
             }
 
             TeacherRecommendations = await _context.TeacherRecommendations

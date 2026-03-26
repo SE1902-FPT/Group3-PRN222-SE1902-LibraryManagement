@@ -3,63 +3,101 @@
 
 @{
     Layout = "_AdminLayout";
-    ViewData["Title"] = "Book Management";
+    ViewData["Title"] = "Quản lý sách";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="h4 m-0 text-primary">Danh sách đầu sách</h2>
-    <a asp-page="Create" class="btn btn-primary btn-sm">
+    <a asp-page="Create" class="btn btn-primary shadow-sm">
         <i class="bi bi-plus-circle me-1"></i> Thêm sách mới
     </a>
 </div>
 
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-bold small">Tìm kiếm</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" asp-for="SearchString" class="form-control border-start-0" placeholder="Nhập tên sách, tác giả hoặc ISBN..." />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold small">Lọc theo thể loại</label>
+                <select asp-for="CategoryFilter" asp-items="Model.Categories" class="form-select">
+                    <option value="">-- Tất cả thể loại --</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-filter me-1"></i> Áp dụng
+                </button>
+                <a asp-page="./Index" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="table-responsive">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle bg-white rounded shadow-sm">
         <thead class="table-light">
             <tr>
                 <th>Ảnh</th>
                 <th>@Html.DisplayNameFor(model => model.Book[0].Title)</th>
-                <th>@Html.DisplayNameFor(model => model.Book[0].Author)</th>
-                <th>@Html.DisplayNameFor(model => model.Book[0].Isbn)</th>
-                <th>NXB</th>
-                <th>Năm</th>
-                <th style="width: 200px;">Mô tả</th>
+                <th>Tác giả</th>
+                <th>Thông tin XB</th>
+                <th style="width: 250px;">Mô tả</th>
                 <th>SL</th>
-                <th>Hành động</th>
+                <th class="text-end">Hành động</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model.Book)
+            @if (Model.Book.Any())
+            {
+                @foreach (var item in Model.Book)
+                {
+                    <tr>
+                        <td>
+                            <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "https://via.placeholder.com/70x100" : item.ImageUrl)"
+                                 class="rounded shadow-sm" style="width: 60px; height: 85px; object-fit: cover;"
+                                 onerror="this.src='https://via.placeholder.com/70x100'" />
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark">@item.Title</div>
+                            <span class="badge bg-info text-dark mt-1" style="font-size: 0.75rem;">
+                                @item.Category?.CategoryName
+                            </span>
+                        </td>
+                        <td>@item.Author</td>
+                        <td>
+                            <div class="small text-muted">NXB: @item.Publisher</div>
+                            <div class="small text-muted">Năm: @item.PublishYear</div>
+                        </td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 230px;" title="@item.Description">
+                                @item.Description
+                            </div>
+                        </td>
+                        <td class="text-center">@item.TotalQuantity</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm shadow-sm">
+                                <a asp-page="./Edit" asp-route-id="@item.BookId" class="btn btn-white border"><i class="bi bi-pencil text-primary"></i></a>
+                                <a asp-page="./Details" asp-route-id="@item.BookId" class="btn btn-white border"><i class="bi bi-eye text-info"></i></a>
+                                <a asp-page="./Delete" asp-route-id="@item.BookId" class="btn btn-white border"><i class="bi bi-trash text-danger"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
             {
                 <tr>
-                    <td>
-                        @if (!string.IsNullOrEmpty(item.ImageUrl))
-                        {
-                            <img src="@item.ImageUrl" alt="Book Cover" class="img-thumbnail-custom"
-                                 onerror="this.src='https://via.placeholder.com/70x100?text=No+Image'" />
-                        }
-                        else
-                        {
-                            <img src="https://via.placeholder.com/70x100?text=No+Image" class="img-thumbnail-custom" />
-                        }
-                    </td>
-                    <td class="fw-bold">@Html.DisplayFor(modelItem => item.Title)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Author)</td>
-                    <td><small class="text-muted">@item.Isbn</small></td>
-                    <td>@item.Publisher</td>
-                    <td>@item.PublishYear</td>
-                    <td>
-                        <div class="text-truncate" style="max-width: 180px;" title="@item.Description">
-                            @item.Description
-                        </div>
-                    </td>
-                    <td class="text-center"><span class="badge bg-secondary">@item.TotalQuantity</span></td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <a asp-page="./Edit" asp-route-id="@item.BookId" class="btn btn-outline-primary" title="Sửa"><i class="bi bi-pencil text-primary"></i></a>
-                            <a asp-page="./Details" asp-route-id="@item.BookId" class="btn btn-outline-info" title="Chi tiết"><i class="bi bi-eye text-info"></i></a>
-                            <a asp-page="./Delete" asp-route-id="@item.BookId" class="btn btn-outline-danger" title="Xóa"><i class="bi bi-trash text-danger"></i></a>
-                        </div>
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="bi bi-search fs-2 d-block mb-2"></i>
+                        Không tìm thấy sách nào khớp với yêu cầu của bạn.
                     </td>
                 </tr>
             }

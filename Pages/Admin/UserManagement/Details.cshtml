@@ -2,55 +2,163 @@
 @model Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement.DetailsModel
 
 @{
-    ViewData["Title"] = "Details";
-    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Chi tiết hồ sơ người dùng";
 }
 
-<h1>Details</h1>
+<div class="container-fluid">
+    <div class="mb-4">
+        <a asp-page="./Index" class="btn btn-link text-decoration-none p-0 text-muted">
+            <i class="bi bi-chevron-left"></i> Quay lại danh sách
+        </a>
+    </div>
 
-<div>
-    <h4>User</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.FullName)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.FullName)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Email)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.PasswordHash)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.PasswordHash)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Status)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Status)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.CreatedAt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.CreatedAt)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Role)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Role.RoleId)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-page="./Edit" asp-route-id="@Model.User.UserId">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+    <div class="row">
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body text-center pt-4">
+                    <div class="mb-3">
+                        <i class="bi bi-person-circle text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">@Model.User.FullName</h4>
+                    <p class="text-muted mb-3">@Model.User.Email</p>
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <span class="badge bg-primary px-3 py-2">@Model.User.Role.RoleName</span>
+                        <span class="badge @(Model.User.Status == "Active" ? "bg-success" : "bg-danger") px-3 py-2">
+                            @Model.User.Status
+                        </span>
+                    </div>
+                    <hr />
+                    <div class="text-start small">
+                        <p class="mb-2 text-muted"><strong>ID người dùng:</strong> #@Model.User.UserId</p>
+                        <p class="mb-0 text-muted"><strong>Ngày tham gia:</strong> @Model.User.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                </div>
+                <div class="card-footer bg-light border-0 d-grid">
+                    <a asp-page="./Edit" asp-route-id="@Model.User.UserId" class="btn btn-warning shadow-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa hồ sơ
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title m-0 fw-bold text-dark">Thông tin chi tiết hệ thống</h5>
+                </div>
+                <div class="card-body">
+
+                    @* 1. HIỂN THỊ LỚP HỌC (Cho Teacher hoặc Student) *@
+                    @if (Model.User.Role.RoleName == "Teacher")
+                    {
+                        <section class="mb-4">
+                            <h6 class="text-primary fw-bold mb-3"><i class="bi bi-door-open me-2"></i>Lớp đang chủ nhiệm</h6>
+                            @if (Model.ManagedClasses.Any())
+                            {
+                                <div class="row g-2">
+                                    @foreach (var c in Model.ManagedClasses)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded bg-light d-flex align-items-center">
+                                                <i class="bi bi-briefcase text-info fs-4 me-3"></i>
+                                                <div>
+                                                    <div class="fw-bold">@c.ClassName</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted small italic">Chưa được phân công chủ nhiệm lớp nào.</p>
+                            }
+                        </section>
+                    }
+
+                    @if (Model.User.Role.RoleName == "Student")
+                    {
+                        <section class="mb-4">
+                            <h6 class="text-primary fw-bold mb-3"><i class="bi bi-book me-2"></i>Lớp đang theo học</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                @if (Model.JoinedClasses.Any())
+                                {
+                                    @foreach (var c in Model.JoinedClasses)
+                                    {
+                                        <span class="badge bg-dark rounded-pill px-3 py-2"><i class="bi bi-tag-fill me-1"></i> @c.ClassName</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Chưa đăng ký lớp học.</span>
+                                }
+                            </div>
+                        </section>
+                    }
+
+                    @* 2. HIỂN THỊ QUAN HỆ (Cho Parent hoặc Student) *@
+                    <section>
+                        @if (Model.User.Role.RoleName == "Student")
+                        {
+                            <h6 class="text-primary fw-bold mb-3 border-top pt-3"><i class="bi bi-person-lines-fill me-2"></i>Thông tin Phụ huynh</h6>
+                            @if (Model.LinkedUsers.Any())
+                            {
+                                @foreach (var link in Model.LinkedUsers)
+                                {
+                                    <div class="card mb-3 border bg-white shadow-none">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <i class="bi bi-person-heart text-danger fs-2"></i>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="fw-bold fs-5">@link.Parent.FullName</div>
+                                                    <div class="row text-muted small mt-2">
+                                                        <div class="col-md-4"><i class="bi bi-heart me-1"></i> @link.Relationship</div>
+                                                        <div class="col-md-4"><i class="bi bi-telephone me-1"></i> @link.Phone</div>
+                                                        <div class="col-md-4"><i class="bi bi-geo-alt me-1"></i> @link.Address</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted small">Chưa có thông tin phụ huynh liên kết.</p>
+                            }
+                        }
+                        else if (Model.User.Role.RoleName == "Parent")
+                        {
+                            <h6 class="text-primary fw-bold mb-3 border-top pt-3"><i class="bi bi-people-fill me-2"></i>Danh sách con em đang theo học</h6>
+                            @if (Model.LinkedUsers.Any())
+                            {
+                                <div class="list-group list-group-flush border rounded shadow-none">
+                                    @foreach (var link in Model.LinkedUsers)
+                                    {
+                                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                            <div>
+                                                <div class="fw-bold text-dark">@link.Student.FullName</div>
+                                                <div class="small text-muted">Mối quan hệ: @link.Relationship</div>
+                                            </div>
+                                            <a asp-page="./Details" asp-route-id="@link.StudentId" class="btn btn-sm btn-outline-info">
+                                                Xem hồ sơ sinh viên
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted small">Chưa liên kết với học sinh nào.</p>
+                            }
+                        }
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

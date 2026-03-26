@@ -28,11 +28,9 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
         public string? StudentClassName { get; set; }
         public int PendingCount { get; set; }
         public List<int> FavoriteBookIds { get; set; } = new();
-        public List<int> RequestedBookIds { get; set; } = new();
+        public Dictionary<int, string> BookRequestStatuses { get; set; } = new();
 
-        // =============================================
         // OnGetAsync: Load danh sách sách và thông tin học sinh
-        // =============================================
         public async Task<IActionResult> OnGetAsync(int? categoryId, string? search)
         {
             if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
@@ -55,7 +53,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
 
             // Đếm số sách đang chờ duyệt
             PendingCount = await _context.BorrowRequests
-                .CountAsync(r => r.StudentId == studentId && r.Status == "Pending");
+                .CountAsync(r => r.StudentId == studentId && (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
 
             // Lấy danh sách ID sách yêu thích
             FavoriteBookIds = await _context.FavoriteBooks
@@ -63,14 +61,20 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
                 .Select(fb => fb.BookId)
                 .ToListAsync();
 
-            // Lấy danh sách ID sách đã đăng ký mượn/đang mượn
-            RequestedBookIds = await _context.BorrowRequests
+            // Lấy danh sách ID sách đã đăng ký mượn/đang mượn cùng với trạng thái
+            var requests = await _context.BorrowRequests
                 .Include(r => r.Copy)
                 .Where(r => r.StudentId == studentId && r.Copy != null && r.Copy.BookId != null &&
                             (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"))
-                .Select(r => r.Copy.BookId ?? 0)
-                .Distinct()
                 .ToListAsync();
+            // lấy trạng thái sách
+            BookRequestStatuses = requests
+                .GroupBy(r => r.Copy.BookId.Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Any(r => r.Status == "Borrowed") ? "Borrowed" :
+                         g.Any(r => r.Status == "Approved") ? "Approved" : "Pending"
+                );
 
             // Load danh mục
             Categories = await _context.Categories.ToListAsync();
@@ -92,9 +96,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
             return Page();
         }
 
-        // =============================================
         // OnPostToggleFavoriteAsync: Thêm/xóa khỏi danh sách yêu thích
-        // =============================================
         public async Task<IActionResult> OnPostToggleFavoriteAsync(int bookId)
         {
             if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
@@ -122,7 +124,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
                     BookId = bookId,
                     CreatedAt = DateTime.Now
                 });
-                Message = "Đã thêm sách vào danh sách yêu thích ❤️";
+                Message = "Đã thêm sách vào danh sách yêu thích";
             }
             
             MessageType = "success";
@@ -130,9 +132,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
             return RedirectToPage();
         }
 
-        // =============================================
         // OnPostBorrowAsync: Tạo yêu cầu mượn sách
-        // =============================================
         public async Task<IActionResult> OnPostBorrowAsync(int copyId, DateTime expectedReturnDate)
         {
             if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
@@ -176,7 +176,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Student
 
             if (pendingCount >= 5)
             {
-                Message = "Bạn chỉ được mượn tối đa 5 quyển sách cùng lúc!";
+                Message = "Bạn chỉ được tạo tối đa 5 yêu cầu!";
                 MessageType = "error";
                 return RedirectToPage();
             }

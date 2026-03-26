@@ -217,11 +217,21 @@
 
                             <!-- Nút hành động -->
                             <div class="mt-auto flex gap-2">
-                                @if (Model.RequestedBookIds.Contains(book.BookId))
+                                @if (Model.BookRequestStatuses.ContainsKey(book.BookId))
                                 {
-                                    <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
-                                        Đã đăng ký
-                                    </button>
+                                    var status = Model.BookRequestStatuses[book.BookId];
+                                    if (status == "Approved" || status == "Borrowed")
+                                    {
+                                        <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
+                                            Đã được mượn
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-500 font-bold rounded-xl-friendly text-sm cursor-not-allowed border border-gray-300">
+                                            Đã đăng ký
+                                        </button>
+                                    }
                                 }
                                 else if (firstAvailableCopy != null && Model.PendingCount < 5)
                                 {
@@ -233,7 +243,7 @@
                                 else if (Model.PendingCount >= 5)
                                 {
                                     <button disabled class="flex-1 py-2.5 bg-gray-200 text-gray-400 font-bold rounded-xl-friendly text-sm cursor-not-allowed">
-                                        Đủ 5 quyển
+                                        Đã đủ 5 yêu cầu
                                     </button>
                                 }
                                 else

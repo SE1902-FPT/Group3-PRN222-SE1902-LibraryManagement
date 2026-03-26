@@ -19,7 +19,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
         }
 
         [BindProperty]
-        public User User { get; set; } = default!;
+        public User UserItem { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -36,7 +36,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
             }
             else
             {
-                User = user;
+                UserItem = user;
             }
             return Page();
         }
@@ -51,8 +51,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
             var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
-                User = user;
-                _context.Users.Remove(User);
+                UserItem = user;
+                _context.Users.Remove(UserItem);
                 await _context.SaveChangesAsync();
             }
 

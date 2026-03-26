@@ -10,12 +10,12 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
     public class LoginModel : PageModel
     {
         [BindProperty]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [BindProperty]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; set; }
 
         // Chuỗi kết nối Database của bạn
         private readonly string connectionString = @"Server=DESKTOP-9CCGUJS\SQLEXPRESS01;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
@@ -50,14 +50,14 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                     {
                         if (reader.Read())
                         {
-                            string status = reader["Status"].ToString();
+                            var status = reader["Status"]?.ToString();
                             if (status != "Active")
                             {
                                 ErrorMessage = "Tài khoản của bạn đã bị khóa!";
                                 return Page();
                             }
 
-                            string fullName = reader["FullName"].ToString();
+                            var fullName = reader["FullName"]?.ToString() ?? string.Empty;
                             int roleId = Convert.ToInt32(reader["RoleID"]);
 
                             // Chuyển RoleID thành Tên Quyền để dễ quản lý trong ASP.NET

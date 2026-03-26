@@ -20,7 +20,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
         }
 
         [BindProperty]
-        public User User { get; set; } = default!;
+        public User UserItem { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -34,7 +34,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
             {
                 return NotFound();
             }
-            User = user;
+            UserItem = user;
            ViewData["RoleId"] = new SelectList(_context.Roles, "RoleId", "RoleId");
             return Page();
         }
@@ -48,7 +48,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
                 return Page();
             }
 
-            _context.Attach(User).State = EntityState.Modified;
+            _context.Attach(UserItem).State = EntityState.Modified;
 
             try
             {
@@ -56,7 +56,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(User.UserId))
+                if (!UserExists(UserItem.UserId))
                 {
                     return NotFound();
                 }

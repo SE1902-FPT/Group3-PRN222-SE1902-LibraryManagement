@@ -14,45 +14,45 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.FullName)
+            @Html.DisplayNameFor(model => model.UserItem.FullName)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.FullName)
+            @Html.DisplayFor(model => model.UserItem.FullName)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Email)
+            @Html.DisplayNameFor(model => model.UserItem.Email)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
+            @Html.DisplayFor(model => model.UserItem.Email)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.PasswordHash)
+            @Html.DisplayNameFor(model => model.UserItem.PasswordHash)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.PasswordHash)
+            @Html.DisplayFor(model => model.UserItem.PasswordHash)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Status)
+            @Html.DisplayNameFor(model => model.UserItem.Status)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Status)
+            @Html.DisplayFor(model => model.UserItem.Status)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.CreatedAt)
+            @Html.DisplayNameFor(model => model.UserItem.CreatedAt)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.CreatedAt)
+            @Html.DisplayFor(model => model.UserItem.CreatedAt)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Role)
+            @Html.DisplayNameFor(model => model.UserItem.Role)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Role.RoleId)
+            @Html.DisplayFor(model => model.UserItem.Role.RoleId)
         </dd>
     </dl>
     
     <form method="post">
-        <input type="hidden" asp-for="User.UserId" />
+        <input type="hidden" asp-for="UserItem.UserId" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-page="./Index">Back to List</a>
     </form>

@@ -18,7 +18,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
             _context = context;
         }
 
-        public User User { get; set; } = default!;
+        public User UserItem { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -34,7 +34,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
             }
             else
             {
-                User = user;
+                UserItem = user;
             }
             return Page();
         }

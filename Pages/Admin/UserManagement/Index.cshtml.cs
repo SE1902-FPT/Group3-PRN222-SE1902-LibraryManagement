@@ -18,11 +18,11 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
             _context = context;
         }
 
-        public IList<User> User { get;set; } = default!;
+        public IList<User> Users { get; set; } = new List<User>();
 
         public async Task OnGetAsync()
         {
-            User = await _context.Users
+            Users = await _context.Users
                 .Include(u => u.Role).ToListAsync();
         }
     }

@@ -82,7 +82,7 @@
                 </div>
                 <div class="md:w-2/3 p-8">
                     <div class="flex items-start justify-between mb-4">
-                        <h1 class="text-3xl font-bold text-gray-900">@Model.Book.Title</h1>
+                        <h1 class="text-3xl font-bold text-gray-900">@(Model.Book?.Title ?? "Chi tiết sách")</h1>
                         @if (Model.TeacherRecommendations.Any())
                         {
                             <span class="bg-fresh-green text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Gợi ý</span>
@@ -92,29 +92,29 @@
                     <div class="space-y-4 mb-6">
                         <div class="flex items-center gap-2">
                             <span class="text-gray-500 font-medium">Tác giả:</span>
-                            <span class="font-semibold">@Model.Book.Author</span>
+                            <span class="font-semibold">@(Model.Book?.Author ?? "Chưa cập nhật")</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-gray-500 font-medium">Nhà xuất bản:</span>
-                            <span class="font-semibold">@Model.Book.Publisher</span>
+                            <span class="font-semibold">@(Model.Book?.Publisher ?? "Chưa cập nhật")</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-gray-500 font-medium">Năm xuất bản:</span>
-                            <span class="font-semibold">@Model.Book.PublishYear</span>
+                            <span class="font-semibold">@(Model.Book?.PublishYear?.ToString() ?? "N/A")</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-gray-500 font-medium">Thể loại:</span>
-                            <span class="font-semibold">@Model.Book.Category?.CategoryName</span>
+                            <span class="font-semibold">@(Model.Book?.Category?.CategoryName ?? "Chưa phân loại")</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-gray-500 font-medium">Số bản có sẵn:</span>
                             <span class="font-semibold @(Model.AvailableCopies > 0 ? "text-fresh-green" : "text-red-500")">
-                                @Model.AvailableCopies / @Model.Book.BookCopies.Count
+                                @Model.AvailableCopies / @(Model.Book?.BookCopies.Count ?? 0)
                             </span>
                         </div>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.Book.Description))
+                    @if (!string.IsNullOrEmpty(Model.Book?.Description))
                     {
                         <div class="mb-6">
                             <h3 class="text-lg font-bold mb-2">Mô tả</h3>
@@ -155,8 +155,9 @@
                         }
                         else if (Model.AvailableCopies > 0 && Model.PendingCount < 5)
                         {
-                            var firstAvailable = Model.Book.BookCopies.FirstOrDefault(c => c.Status == "Available");
-                            <button onclick="openBorrowModal(@firstAvailable?.CopyId, '@Html.Raw(Model.Book.Title.Replace("'", "\\'"))')" class="px-8 py-3 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly transition-all shadow-lg">
+                            var firstAvailable = Model.Book?.BookCopies.FirstOrDefault(c => c.Status == "Available");
+                            var safeBookTitle = (Model.Book?.Title ?? string.Empty).Replace("\\", "\\\\").Replace("'", "\\'");
+                            <button onclick="openBorrowModal(@firstAvailable?.CopyId, '@safeBookTitle')" class="px-8 py-3 bg-fresh-green hover:bg-green-500 text-white font-bold rounded-xl-friendly transition-all shadow-lg">
                                 Đăng ký mượn
                             </button>
                         }
@@ -174,7 +175,7 @@
                         }
 
                         <form method="post" asp-page-handler="ToggleFavorite">
-                            <input type="hidden" name="bookId" value="@Model.Book.BookId" />
+                            <input type="hidden" name="bookId" value="@Model.Book?.BookId" />
                             <button type="submit" class="px-6 py-3 @(Model.IsFavorite ? "bg-red-50 text-red-500 border border-red-200" : "bg-gray-100 hover:bg-gray-200 text-gray-700") font-bold rounded-xl-friendly transition-colors flex items-center gap-2">
                                 <svg class="h-5 w-5 @(Model.IsFavorite ? "fill-current" : "")" fill="@(Model.IsFavorite ? "currentColor" : "none")" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />

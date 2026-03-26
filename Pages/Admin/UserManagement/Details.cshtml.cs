@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
 
-namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
+namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
 {
     public class DetailsModel : PageModel
     {
@@ -18,7 +18,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
             _context = context;
         }
 
-        public Book Book { get; set; } = default!;
+        public User User { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -27,18 +27,14 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
                 return NotFound();
             }
 
-            // QUAN TRỌNG: Thêm .Include(b => b.Category) để nạp dữ liệu thể loại
-            var book = await _context.Books
-                .Include(b => b.Category)
-                .FirstOrDefaultAsync(m => m.BookId == id);
-
-            if (book == null)
+            var user = await _context.Users.FirstOrDefaultAsync(m => m.UserId == id);
+            if (user == null)
             {
                 return NotFound();
             }
             else
             {
-                Book = book;
+                User = user;
             }
             return Page();
         }

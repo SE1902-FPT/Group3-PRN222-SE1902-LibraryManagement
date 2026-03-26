@@ -2,83 +2,67 @@
 @model Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Book Management";
 }
 
-<h1>Book Management</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 m-0 text-primary">Danh sách đầu sách</h2>
+    <a asp-page="Create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle me-1"></i> Thêm sách mới
+    </a>
+</div>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Author)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Isbn)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Publisher)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].PublishYear)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].ImageUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].TotalQuantity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Category)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Book) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Author)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Isbn)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Publisher)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PublishYear)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImageUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TotalQuantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.CategoryId)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.BookId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.BookId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.BookId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Ảnh</th>
+                <th>@Html.DisplayNameFor(model => model.Book[0].Title)</th>
+                <th>@Html.DisplayNameFor(model => model.Book[0].Author)</th>
+                <th>@Html.DisplayNameFor(model => model.Book[0].Isbn)</th>
+                <th>NXB</th>
+                <th>Năm</th>
+                <th style="width: 200px;">Mô tả</th>
+                <th>SL</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Book)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="Book Cover" class="img-thumbnail-custom"
+                                 onerror="this.src='https://via.placeholder.com/70x100?text=No+Image'" />
+                        }
+                        else
+                        {
+                            <img src="https://via.placeholder.com/70x100?text=No+Image" class="img-thumbnail-custom" />
+                        }
+                    </td>
+                    <td class="fw-bold">@Html.DisplayFor(modelItem => item.Title)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Author)</td>
+                    <td><small class="text-muted">@item.Isbn</small></td>
+                    <td>@item.Publisher</td>
+                    <td>@item.PublishYear</td>
+                    <td>
+                        <div class="text-truncate" style="max-width: 180px;" title="@item.Description">
+                            @item.Description
+                        </div>
+                    </td>
+                    <td class="text-center"><span class="badge bg-secondary">@item.TotalQuantity</span></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a asp-page="./Edit" asp-route-id="@item.BookId" class="btn btn-outline-primary" title="Sửa"><i class="bi bi-pencil text-primary"></i></a>
+                            <a asp-page="./Details" asp-route-id="@item.BookId" class="btn btn-outline-info" title="Chi tiết"><i class="bi bi-eye text-info"></i></a>
+                            <a asp-page="./Delete" asp-route-id="@item.BookId" class="btn btn-outline-danger" title="Xóa"><i class="bi bi-trash text-danger"></i></a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

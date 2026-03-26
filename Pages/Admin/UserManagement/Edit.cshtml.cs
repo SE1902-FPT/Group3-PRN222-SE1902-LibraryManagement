@@ -8,19 +8,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
 
-namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
+namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
 {
     public class EditModel : PageModel
     {
-        private readonly ThuVienContext _context;
+        private readonly Group3_SE1902_PRN222_LibraryManagement.Models.ThuVienContext _context;
 
-        public EditModel(ThuVienContext context)
+        public EditModel(Group3_SE1902_PRN222_LibraryManagement.Models.ThuVienContext context)
         {
             _context = context;
         }
 
         [BindProperty]
-        public Book Book { get; set; } = default!;
+        public User User { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,27 +29,26 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
                 return NotFound();
             }
 
-            var book = await _context.Books.FirstOrDefaultAsync(m => m.BookId == id);
-            if (book == null)
+            var user =  await _context.Users.FirstOrDefaultAsync(m => m.UserId == id);
+            if (user == null)
             {
                 return NotFound();
             }
-            Book = book;
-
-            // Nạp danh sách Category và chọn sẵn ID hiện tại của sách
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", book.CategoryId);
+            User = user;
+           ViewData["RoleId"] = new SelectList(_context.Roles, "RoleId", "RoleId");
             return Page();
         }
 
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName");
                 return Page();
             }
 
-            _context.Attach(Book).State = EntityState.Modified;
+            _context.Attach(User).State = EntityState.Modified;
 
             try
             {
@@ -57,7 +56,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BookExists(Book.BookId))
+                if (!UserExists(User.UserId))
                 {
                     return NotFound();
                 }
@@ -70,9 +69,9 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
             return RedirectToPage("./Index");
         }
 
-        private bool BookExists(int id)
+        private bool UserExists(int id)
         {
-            return _context.Books.Any(e => e.BookId == id);
+            return _context.Users.Any(e => e.UserId == id);
         }
     }
 }

@@ -88,19 +88,18 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                                     return RedirectToPage("/Admin"); // Chuyển đến trang của Quản trị viên
 
                                 case "Librarian":
-                                    return RedirectToPage("/Librarian/Libralian_Dashboard"); // Chuyển đến trang của Thủ thư
+                                    return RedirectToPage("/Librarian/Libralian_Dashboard");
 
                                 case "Teacher":
-                                    return RedirectToPage("/TeacherDashboard"); // Chuyển đến trang của Giáo viên
+                                    return RedirectToPage("/Teacher/Index");
 
                                 case "Parent":
-                                    return RedirectToPage("/ParentDashboard"); // Chuyển đến trang của Phụ huynh
+                                    return RedirectToPage("/ParentDashboard");
 
                                 case "Student":
-                                    return RedirectToPage("/student/book"); // Chuyển đến trang của Học sinh
+                                    return RedirectToPage("/Student/Book");
 
                                 default:
-                                    // Đề phòng trường hợp lỗi hoặc có quyền lạ chưa được định nghĩa
                                     return RedirectToPage("/Index");
                             }
                         }

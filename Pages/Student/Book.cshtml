@@ -357,6 +357,7 @@
     </div>
 
     <script>
+<<<<<<< HEAD
         document.addEventListener('DOMContentLoaded', function () {
             const profileBtn = document.getElementById('profile-btn');
             const profileDropdown = document.getElementById('profile-dropdown');
@@ -373,6 +374,8 @@
             });
         });
 
+=======
+>>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
         function formatDDMMYYYY(isoVal) {
             if (!isoVal) return '';
             const [y, m, d] = isoVal.split('-');
@@ -388,7 +391,11 @@
             const today = new Date();
             const toISO = (d) => d.toISOString().split('T')[0];
             const minDate = toISO(today);
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
             const max = new Date();
             max.setDate(today.getDate() + 7);
             const maxDate = toISO(max);

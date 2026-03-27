@@ -72,39 +72,20 @@ public class BorrowedBooksModel : PageModel
         var record = await _context.BorrowRecords
             .Include(b => b.Copy)
 <<<<<<< HEAD
+<<<<<<< HEAD
                 .ThenInclude(c => c.Book)
+=======
+>>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
             .FirstOrDefaultAsync(b => b.BorrowId == borrowId);
 
-        if (record != null && record.ReturnDate == null)
+        if (record == null)
         {
-            record.ReturnDate = DateTime.Now;
-            record.Status = "Returned";
-            
-            if (record.Copy != null)
-            {
-                record.Copy.Status = "Available";
-            }
-
-            // Ghi nhận người trả (thủ thư hiện tại)
-            var email = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
-            if (!string.IsNullOrEmpty(email))
-            {
-                var librarian = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-                if (librarian != null)
-                {
-                    record.ProcessedBy = librarian.UserId;
-                }
-            }
-
-            await _context.SaveChangesAsync();
-
-            // Gửi thông báo realtime cho phụ huynh
-            if (record.StudentId.HasValue && record.Copy?.Book?.Title != null)
-            {
-                await _notificationService.SendReturnAsync(record.StudentId.Value, record.Copy.Book.Title);
-            }
+            ErrorMessage = "Không tìm thấy bản ghi mượn.";
+            await OnGetAsync();
+            return Page();
         }
 
+<<<<<<< HEAD
 =======
             .FirstOrDefaultAsync(b => b.BorrowId == borrowId);
 
@@ -115,6 +96,8 @@ public class BorrowedBooksModel : PageModel
             return Page();
         }
 
+=======
+>>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
         // 1. Đánh dấu BorrowRecord là đã trả
         record.ReturnDate = DateTime.Now;
         record.Status = "Returned";
@@ -135,7 +118,10 @@ public class BorrowedBooksModel : PageModel
 
         await _context.SaveChangesAsync();
 
+<<<<<<< HEAD
 >>>>>>> 253f800 (update status)
+=======
+>>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
         return RedirectToPage();
     }
 }

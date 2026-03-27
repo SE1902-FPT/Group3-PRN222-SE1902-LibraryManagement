@@ -27,22 +27,14 @@
                     <th>Ngày mượn</th>
                     <th>Hạn trả</th>
                     <th>Trạng thái</th>
-<<<<<<< HEAD
-<<<<<<< HEAD
                     <th>Thao tác</th>
-=======
-                    <th>Hành động</th>
->>>>>>> 253f800 (update status)
-=======
-                    <th>Hành động</th>
->>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
                 </tr>
             </thead>
             <tbody>
                 @if (Model.CurrentBorrowRecords.Count == 0)
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-muted">Chưa có ai đang mượn.</td>
+                        <td colspan="8" class="text-center text-muted">Chưa có ai đang mượn.</td>
                     </tr>
                 }
                 else
@@ -66,28 +58,10 @@
                                 <span class="badge bg-primary">@b.Status</span>
                             </td>
                             <td>
-<<<<<<< HEAD
-<<<<<<< HEAD
                                 <form method="post" asp-page-handler="Return" onsubmit="return confirm('Xác nhận học sinh đã trả sách này?');">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="borrowId" value="@b.BorrowId" />
                                     <button type="submit" class="btn btn-sm btn-success">Trả sách</button>
-=======
-                                <form method="post" asp-page-handler="Return" style="display:inline;">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="borrowId" value="@b.BorrowId" />
-=======
-                                <form method="post" asp-page-handler="Return" style="display:inline;">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="borrowId" value="@b.BorrowId" />
->>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
-                                    <button type="submit" class="btn btn-sm btn-success"
-                                            onclick="return confirm('Xác nhận học sinh đã trả sách?')">
-                                        Xác nhận trả
-                                    </button>
-<<<<<<< HEAD
->>>>>>> 253f800 (update status)
-=======
->>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
                                 </form>
                             </td>
                         </tr>
@@ -97,4 +71,3 @@
         </table>
     </div>
 </div>
-

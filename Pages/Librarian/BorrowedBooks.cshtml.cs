@@ -71,11 +71,7 @@ public class BorrowedBooksModel : PageModel
     {
         var record = await _context.BorrowRecords
             .Include(b => b.Copy)
-<<<<<<< HEAD
-<<<<<<< HEAD
-                .ThenInclude(c => c.Book)
-=======
->>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
+                .ThenInclude(c => c!.Book)
             .FirstOrDefaultAsync(b => b.BorrowId == borrowId);
 
         if (record == null)
@@ -85,44 +81,42 @@ public class BorrowedBooksModel : PageModel
             return Page();
         }
 
-<<<<<<< HEAD
-=======
-            .FirstOrDefaultAsync(b => b.BorrowId == borrowId);
-
-        if (record == null)
+        if (record.ReturnDate == null)
         {
-            ErrorMessage = "Không tìm thấy bản ghi mượn.";
-            await OnGetAsync();
-            return Page();
+            record.ReturnDate = DateTime.Now;
+            record.Status = "Returned";
+
+            if (record.Copy != null)
+                record.Copy.Status = "Available";
+
+            // Ghi nhận người trả (thủ thư hiện tại)
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (!string.IsNullOrEmpty(email))
+            {
+                var librarian = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (librarian != null)
+                    record.ProcessedBy = librarian.UserId;
+            }
+
+            // Cập nhật BorrowRequest tương ứng sang Returned
+            var borrowRequest = await _context.BorrowRequests
+                .Where(r => r.StudentId == record.StudentId
+                         && r.CopyId == record.CopyId
+                         && (r.Status == "Borrowed" || r.Status == "Approved"))
+                .FirstOrDefaultAsync();
+
+            if (borrowRequest != null)
+                borrowRequest.Status = "Returned";
+
+            await _context.SaveChangesAsync();
+
+            // Gửi thông báo
+            if (record.StudentId.HasValue && record.Copy?.Book?.Title != null)
+            {
+                await _notificationService.SendReturnAsync(record.StudentId.Value, record.Copy.Book.Title);
+            }
         }
 
-=======
->>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
-        // 1. Đánh dấu BorrowRecord là đã trả
-        record.ReturnDate = DateTime.Now;
-        record.Status = "Returned";
-
-        // 2. Đổi BookCopy về Available
-        if (record.Copy != null)
-            record.Copy.Status = "Available";
-
-        // 3. Cập nhật BorrowRequest tương ứng sang Returned
-        var borrowRequest = await _context.BorrowRequests
-            .Where(r => r.StudentId == record.StudentId
-                     && r.CopyId == record.CopyId
-                     && (r.Status == "Borrowed" || r.Status == "Approved"))
-            .FirstOrDefaultAsync();
-
-        if (borrowRequest != null)
-            borrowRequest.Status = "Returned";
-
-        await _context.SaveChangesAsync();
-
-<<<<<<< HEAD
->>>>>>> 253f800 (update status)
-=======
->>>>>>> 60fe3dd9f78f20036f0b1a1ef601700968962b16
         return RedirectToPage();
     }
 }
-

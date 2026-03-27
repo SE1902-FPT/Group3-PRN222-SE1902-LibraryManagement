@@ -59,17 +59,23 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 
             if (IsStudentView)
             {
-                var studentId = CurrentStudent.UserId;
-                StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    CurrentStudent = await _context.Users
+                        .Include(u => u.ClassesNavigation)
+                        .Include(u => u.Role)
+                        .FirstOrDefaultAsync(u => u.Email == email);
+                }
 
-                PendingCount = await _context.BorrowRequests
-                    .CountAsync(r => r.StudentId == studentId &&
-                                    (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
+                if (CurrentStudent != null)
+                {
+                    var studentId = CurrentStudent.UserId;
+                    StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
 
-                CurrentStudent = await _context.Users
-                    .Include(u => u.ClassesNavigation)
-                    .Include(u => u.Role)
-                    .FirstOrDefaultAsync(u => u.Email == email);
+                    PendingCount = await _context.BorrowRequests
+                        .CountAsync(r => r.StudentId == studentId &&
+                                        (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
 
                 IsRequested = await _context.BorrowRequests
                     .Include(r => r.Copy)
@@ -89,6 +95,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
                     string resolvedStatus = activeRequests.Any(r => r.Status == "Borrowed") ? "Borrowed" :
                                            activeRequests.Any(r => r.Status == "Approved") ? "Approved" : "Pending";
                     BookRequestStatuses[id.Value] = resolvedStatus;
+                }
                 }
             }
 

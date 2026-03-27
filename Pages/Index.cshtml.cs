@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages
@@ -23,13 +24,36 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public List<Book> FeaturedBooks { get; set; } = new();
         public string? UserClassName { get; set; }
 
+        public bool IsAuthenticated { get; set; }
+        public string? LoggedInUserName { get; set; }
+        public string? LoggedInUserRole { get; set; }
+
         public async Task OnGetAsync()
         {
-            // For demo purposes, we fetch the first student if no session exists
-            // In a real app, you would get this from the logged-in user's identity
-            CurrentUser = await _context.Users
-                .Include(u => u.ClassesNavigation)
-                .FirstOrDefaultAsync(u => u.RoleId == 3); // Assuming 3 is Student role
+            IsAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+            if (IsAuthenticated)
+            {
+                LoggedInUserName = User.FindFirst(ClaimTypes.Name)?.Value;
+                LoggedInUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                // Try to find the authenticated user in the database
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    CurrentUser = await _context.Users
+                        .Include(u => u.ClassesNavigation)
+                        .FirstOrDefaultAsync(u => u.Email == email);
+                }
+            }
+
+            // Fallback: fetch first student for demo purposes if no authenticated user found
+            if (CurrentUser == null)
+            {
+                CurrentUser = await _context.Users
+                    .Include(u => u.ClassesNavigation)
+                    .FirstOrDefaultAsync(u => u.RoleId == 3);
+            }
 
             if (CurrentUser != null)
             {

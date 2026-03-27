@@ -23,6 +23,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public string SearchTerm { get; set; } = string.Empty;
         public int? SelectedCategoryId { get; set; }
         public string Availability { get; set; } = "all";
+        public bool IsAuthenticated { get; set; }
 
         public async Task OnGetAsync(int? categoryId, string? search, string? availability)
         {
@@ -32,6 +33,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                 ? "available"
                 : "all";
 
+            IsAuthenticated = User.Identity?.IsAuthenticated == true;
             CurrentUser = await LoadCurrentStudentAsync();
             UserClassName = CurrentUser?.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
 
@@ -91,9 +93,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                 }
             }
 
-            return await _context.Users
-                .Include(u => u.ClassesNavigation)
-                .FirstOrDefaultAsync(u => u.RoleId == 1);
+            return null;
         }
     }
 }

@@ -47,13 +47,12 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // BƯỚC 1: Xóa sạch Validation của các bảng liên quan (Tránh lỗi ModelState.IsValid = false)
+            // Xóa sạch Validate
             var keysToRemove = ModelState.Keys.Where(k => k.StartsWith("User.") && k != "User.FullName" && k != "User.Email" && k != "User.RoleId").ToList();
             foreach (var key in keysToRemove) ModelState.Remove(key);
 
             if (!ModelState.IsValid)
             {
-                // Debug: Xem trường nào đang báo lỗi nếu ModelState vẫn False
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
                 foreach (var error in errors) Console.WriteLine("Validation Error: " + error);
 
@@ -64,19 +63,18 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
 
             try
             {
-                // BƯỚC 2: Gán các giá trị bắt buộc mà DB yêu cầu
                 User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(RawPassword);
                 User.CreatedAt = DateTime.Now;
                 User.Status = "Active";
 
-                // Đảm bảo các trường string không bị null nếu DB không cho phép
+                //check null
                 User.FullName = User.FullName ?? "";
                 User.Email = User.Email ?? "";
 
                 _context.Users.Add(User);
-                await _context.SaveChangesAsync(); // Lưu lần 1 để có UserId
+                await _context.SaveChangesAsync(); //user id
 
-                // BƯỚC 3: Xử lý Logic Role
+                //Role Logic
                 var role = await _context.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.RoleId == User.RoleId);
 
                 if (role?.RoleName == "Student" && SelectedClassId.HasValue)
@@ -102,7 +100,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
             }
             catch (DbUpdateException dbEx)
             {
-                // LỖI DATABASE (Ví dụ: Trùng Email, Sai Foreign Key)
                 var innerMessage = dbEx.InnerException?.Message ?? dbEx.Message;
                 ModelState.AddModelError(string.Empty, "Lỗi Database: " + innerMessage);
             }
@@ -111,7 +108,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
                 ModelState.AddModelError(string.Empty, "Lỗi hệ thống: " + ex.Message);
             }
 
-            // Load lại dữ liệu nếu có lỗi
             ViewData["RoleId"] = new SelectList(_context.Roles, "RoleId", "RoleName");
             ViewData["ClassId"] = new SelectList(_context.Classes, "ClassId", "ClassName");
             return Page();

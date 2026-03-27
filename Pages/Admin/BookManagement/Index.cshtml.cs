@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering; // Cần thiết để làm Dropdown Filter
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
 
@@ -21,7 +21,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
 
         public IList<Book> Book { get; set; } = default!;
 
-        // Lưu trữ giá trị search/filter để hiển thị lại trên Form sau khi load trang
         [BindProperty(SupportsGet = true)]
         public string? SearchString { get; set; }
 
@@ -32,15 +31,13 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
 
         public async Task OnGetAsync()
         {
-            // 1. Nạp danh sách thể loại cho Dropdown Filter
             Categories = new SelectList(await _context.Categories.ToListAsync(), "CategoryId", "CategoryName");
 
-            // 2. Khởi tạo truy vấn gốc
             var booksQuery = _context.Books
                 .Include(b => b.Category)
                 .AsQueryable();
 
-            // 3. Lọc theo từ khóa (Search) nếu có
+            //seach
             if (!string.IsNullOrEmpty(SearchString))
             {
                 booksQuery = booksQuery.Where(s => s.Title.Contains(SearchString)
@@ -48,7 +45,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
                                                || s.Isbn.Contains(SearchString));
             }
 
-            // 4. Lọc theo Thể loại (Filter) nếu có
+            //filter
             if (CategoryFilter.HasValue)
             {
                 booksQuery = booksQuery.Where(x => x.CategoryId == CategoryFilter);

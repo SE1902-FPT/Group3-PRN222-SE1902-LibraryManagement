@@ -20,7 +20,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
 
         public IActionResult OnGet()
         {
-            // Thay "CategoryId" cuối cùng bằng "CategoryName" để hiển thị chữ thay vì số
             ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName");
             return Page();
         }
@@ -28,12 +27,10 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
         [BindProperty]
         public Book Book { get; set; } = default!;
 
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                // Nếu dữ liệu nhập vào bị lỗi, phải nạp lại danh sách Category trước khi trả về View
                 ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName");
                 return Page();
             }

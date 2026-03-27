@@ -27,7 +27,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
                 return NotFound();
             }
 
-            // QUAN TRỌNG: Thêm .Include(b => b.Category) để nạp dữ liệu thể loại
             var book = await _context.Books
                 .Include(b => b.Category)
                 .FirstOrDefaultAsync(m => m.BookId == id);

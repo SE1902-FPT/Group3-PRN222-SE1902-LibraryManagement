@@ -1,4 +1,6 @@
+using Group3_SE1902_PRN222_LibraryManagement.Hubs;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
+using Group3_SE1902_PRN222_LibraryManagement.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -27,13 +29,13 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             OnRedirectToLogin = context =>
             {
                 var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
-                context.Response.Redirect($"/Login?error=login_required&returnUrl={Uri.EscapeDataString(returnUrl)}");
+                context.Response.Redirect($"/Error?error=login_required&returnUrl={Uri.EscapeDataString(returnUrl)}");
                 return Task.CompletedTask;
             },
             OnRedirectToAccessDenied = context =>
             {
                 var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
-                context.Response.Redirect($"/Login?error=access_denied&returnUrl={Uri.EscapeDataString(returnUrl)}");
+                context.Response.Redirect($"/Error?error=access_denied&returnUrl={Uri.EscapeDataString(returnUrl)}");
                 return Task.CompletedTask;
             }
         };
@@ -42,6 +44,15 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             // Add DB Context
             builder.Services.AddDbContext<ThuVienContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ThuvienDB")));
+
+            // SignalR
+            builder.Services.AddSignalR();
+
+            // Notification service (scoped – one per request / scope)
+            builder.Services.AddScoped<NotificationService>();
+
+            // Overdue background job (singleton IHostedService)
+            builder.Services.AddHostedService<OverdueCheckJob>();
 
             var app = builder.Build();
 
@@ -59,6 +70,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement
             app.UseAuthorization();
 
             app.MapRazorPages();
+            app.MapHub<ParentNotificationHub>("/hubs/parentNotifications");
 
             app.Run();
         }

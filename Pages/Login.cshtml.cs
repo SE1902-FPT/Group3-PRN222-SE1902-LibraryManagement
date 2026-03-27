@@ -18,7 +18,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public string ErrorMessage { get; set; }
 
         // Chuỗi kết nối Database của bạn
-        private readonly string connectionString = @"Server=localhost\SQLEXPRESS;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
+        private readonly string connectionString = @"Server=.;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
 
         public void OnGet()
         {
@@ -85,22 +85,21 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                             switch (roleName)
                             {
                                 case "Admin":
-                                    return RedirectToPage("/AdminDashboard"); // Chuyển đến trang của Quản trị viên
+                                    return RedirectToPage("/Admin"); // Chuyển đến trang của Quản trị viên
 
                                 case "Librarian":
-                                    return RedirectToPage("/Librarian/Libralian_Dashboard"); // Chuyển đến trang của Thủ thư
+                                    return RedirectToPage("/Librarian/Libralian_Dashboard");
 
                                 case "Teacher":
-                                    return RedirectToPage("/TeacherDashboard"); // Chuyển đến trang của Giáo viên
+                                    return RedirectToPage("/Teacher/Index");
 
                                 case "Parent":
-                                    return RedirectToPage("/ParentDashboard"); // Chuyển đến trang của Phụ huynh
+                                    return RedirectToPage("/ParentDashboard");
 
                                 case "Student":
                                     return RedirectToPage("/index"); // Chuyển đến trang của Học sinh
 
                                 default:
-                                    // Đề phòng trường hợp lỗi hoặc có quyền lạ chưa được định nghĩa
                                     return RedirectToPage("/Index");
                             }
                         }

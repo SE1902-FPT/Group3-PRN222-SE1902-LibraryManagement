@@ -1,0 +1,105 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Parent.DashboardModel
+@{
+    ViewData["Title"] = "Tổng quan";
+    Layout = "~/Pages/Shared/_ParentLayout.cshtml";
+    ViewData["ParentId"] = Model.ParentUserId;
+    ViewData["UnreadCount"] = Model.UnreadNotificationsCount;
+}
+
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-slate-800">Chào mừng, @User.Identity?.Name!</h1>
+    <p class="text-slate-500 mt-1">Nơi theo dõi hành trình đọc sách của các con.</p>
+</div>
+
+@if (Model.Children.Count > 1)
+{
+    <form method="get" class="mb-8 p-6 bg-white rounded-2xl-friendly shadow-sm border border-slate-100 flex items-center gap-4">
+        <label class="font-medium text-slate-700">Chọn con:</label>
+        <select name="studentId" onchange="this.form.submit()" class="form-select rounded-xl-friendly border-slate-200 text-slate-700 focus:ring-soft-blue focus:border-soft-blue">
+            @foreach (var child in Model.Children)
+            {
+                if (Model.SelectedStudentId == child.StudentId)
+                {
+                    <option value="@child.StudentId" selected>@child.StudentName - Lớp @child.ClassName</option>
+                }
+                else
+                {
+                    <option value="@child.StudentId">@child.StudentName - Lớp @child.ClassName</option>
+                }
+            }
+        </select>
+    </form>
+}
+
+@if (Model.SelectedStudentId.HasValue)
+{
+    var child = Model.Children.First(c => c.StudentId == Model.SelectedStudentId);
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card">
+            <div class="text-slate-400 text-sm font-semibold mb-2">ĐANG MƯỢN</div>
+            <div class="text-4xl font-black text-soft-orange">@Model.Stats.CurrentlyBorrowed</div>
+        </div>
+        <div class="stat-card">
+            <div class="text-slate-400 text-sm font-semibold mb-2">TỔNG LƯỢT MƯỢN</div>
+            <div class="text-4xl font-black text-fresh-green">@Model.Stats.TotalBorrowed</div>
+        </div>
+        <div class="stat-card">
+            <div class="text-slate-400 text-sm font-semibold mb-2">QUÁ HẠN</div>
+            <div class="text-4xl font-black text-red-500">@Model.Stats.Overdue</div>
+        </div>
+        <div class="stat-card relative overflow-hidden bg-soft-blue text-white border-0">
+            <div class="relative z-10">
+                <div class="text-white/80 text-sm font-semibold mb-2">THÔNG BÁO CHƯA ĐỌC</div>
+                <div class="text-4xl font-black">@Model.UnreadNotificationsCount</div>
+                <a href="/Parent/Notifications" class="text-xs font-semibold inset-0 mt-2 hover:underline">Xem ngay &rarr;</a>
+            </div>
+            <svg class="absolute -bottom-4 -right-4 w-32 h-32 text-white/10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl-friendly shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="text-lg font-bold">Sách @child.StudentName đang mượn</h2>
+            <a href="/Parent/Borrowing?studentId=@Model.SelectedStudentId" class="text-sm font-medium text-soft-blue hover:underline">Xem tất cả</a>
+        </div>
+        @if (Model.RecentBorrows.Any())
+        {
+            <div class="divide-y divide-slate-100">
+                @foreach (var book in Model.RecentBorrows)
+                {
+                    bool isOverdue = book.DueDate < DateTime.Now;
+                    <div class="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                        <div>
+                            <h3 class="font-bold text-slate-800">@book.BookTitle</h3>
+                            <div class="text-sm text-slate-500 mt-1">
+                                Mượn: @book.BorrowDate?.ToString("dd/MM/yyyy") | Hạn trả: @book.DueDate?.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+                        @if (isOverdue)
+                        {
+                            <span class="px-3 py-1 bg-red-100 text-red-600 font-semibold rounded-full text-xs">Quá hạn</span>
+                        }
+                        else
+                        {
+                            <span class="px-3 py-1 bg-green-100 text-green-700 font-semibold rounded-full text-xs">Đang mượn</span>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="p-8 text-center text-slate-400">
+                <p>@child.StudentName hiện không mượn sách nào.</p>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="p-12 text-center bg-white rounded-2xl-friendly shadow-sm border border-slate-100 text-slate-500">
+        Hiện tại bạn chưa được liên kết với học sinh nào. Vui lòng liên hệ thủ thư.
+    </div>
+}

@@ -1,0 +1,93 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Parent.HistoryModel
+@{
+    ViewData["Title"] = "Lịch sử mượn";
+    Layout = "~/Pages/Shared/_ParentLayout.cshtml";
+    ViewData["ParentId"] = Model.ParentUserId;
+    ViewData["UnreadCount"] = Model.UnreadNotificationsCount;
+}
+
+<div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-800">Lịch Sử Mượn Sách</h1>
+        <p class="text-slate-500 mt-1">Toàn bộ hành trình đọc sách của các con tại thư viện.</p>
+    </div>
+    
+    @if (Model.Children.Count > 1)
+    {
+        <form method="get" class="flex items-center gap-3">
+            <label class="font-medium text-slate-700 whitespace-nowrap">Lọc theo con:</label>
+            <select name="studentId" onchange="this.form.submit()" class="form-select rounded-xl-friendly border-slate-200 text-slate-700 bg-white focus:ring-soft-blue focus:border-soft-blue">
+                <option value="">-- Tất cả --</option>
+                @foreach (var child in Model.Children)
+                {
+                    if (Model.SelectedStudentId == child.StudentId)
+                    {
+                        <option value="@child.StudentId" selected>@child.StudentName</option>
+                    }
+                    else
+                    {
+                        <option value="@child.StudentId">@child.StudentName</option>
+                    }
+                }
+            </select>
+        </form>
+    }
+</div>
+
+<div class="bg-white rounded-2xl-friendly shadow-sm border border-slate-100 overflow-hidden">
+    @if (Model.HistoryRecords.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-500 text-sm font-semibold border-b border-slate-100">
+                        <th class="p-4 rounded-tl-2xl-friendly">Học Sinh</th>
+                        <th class="p-4">Tên Sách</th>
+                        <th class="p-4">Ngày Mượn</th>
+                        <th class="p-4">Hạn Trả</th>
+                        <th class="p-4">Ngày Trả</th>
+                        <th class="p-4 rounded-tr-2xl-friendly">Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm">
+                    @foreach (var record in Model.HistoryRecords)
+                    {
+                        bool isReturned = record.ReturnDate != null;
+                        bool isOverdue = !isReturned && record.DueDate < DateTime.Now;
+
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">@record.StudentName</td>
+                            <td class="p-4 text-soft-blue font-bold">@record.BookTitle</td>
+                            <td class="p-4 text-slate-500">@record.BorrowDate?.ToString("dd/MM/yyyy")</td>
+                            <td class="p-4 text-slate-500">@record.DueDate?.ToString("dd/MM/yyyy")</td>
+                            <td class="p-4 text-slate-800 font-medium">
+                                @(record.ReturnDate?.ToString("dd/MM/yyyy") ?? "-")
+                            </td>
+                            <td class="p-4">
+                                @if (isReturned)
+                                {
+                                    <span class="inline-flex px-3 py-1 bg-fresh-green/10 text-fresh-green font-bold rounded-full text-xs">Đã trả</span>
+                                }
+                                else if (isOverdue)
+                                {
+                                    <span class="inline-flex px-3 py-1 bg-red-100 text-red-600 font-bold rounded-full text-xs">Quá hạn</span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex px-3 py-1 bg-sunny-yellow/20 text-yellow-700 font-bold rounded-full text-xs">Đang mượn</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="p-16 text-center text-slate-400">
+            <p class="text-lg font-medium">Chưa có lịch sử mượn sách nào.</p>
+        </div>
+    }
+</div>

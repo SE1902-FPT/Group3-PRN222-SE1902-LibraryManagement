@@ -15,7 +15,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
             _context = context;
         }
 
-        public Book Book { get; set; } = null!;
+        public Book? Book { get; set; }
         public List<TeacherRecommendation> TeacherRecommendations { get; set; } = new();
 
         public Dictionary<int, string> BookRequestStatuses { get; set; } = new();
@@ -26,9 +26,12 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
         public int PendingCount { get; set; }
         public bool IsFavorite { get; set; }
         public bool IsRequested { get; set; }
+        public bool IsStudentView { get; set; }
+        public bool IsTeacherView { get; set; }
 
         [TempData]
         public string? Message { get; set; }
+
         [TempData]
         public string? MessageType { get; set; }
 
@@ -39,33 +42,22 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
                 return NotFound();
             }
 
-            var book = await _context.Books
+            Book = await _context.Books
                 .Include(b => b.Category)
                 .Include(b => b.BookCopies)
                 .FirstOrDefaultAsync(b => b.BookId == id);
 
-            if (book == null)
+            if (Book == null)
             {
                 return NotFound();
             }
 
-            Book = book;
             AvailableCopies = Book.BookCopies.Count(c => c.Status == "Available");
 
-            // Student Context setup
-            if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
-            {
-                return NotFound();
-            }
+            IsStudentView = User.Identity?.IsAuthenticated == true && User.IsInRole("Student");
+            IsTeacherView = User.Identity?.IsAuthenticated == true && User.IsInRole("Teacher");
 
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-
-            CurrentStudent = await _context.Users
-                .Include(u => u.ClassesNavigation)
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Email == email);
-
-            if (CurrentStudent != null)
+            if (IsStudentView)
             {
                 var studentId = CurrentStudent.UserId;
                 StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
@@ -74,8 +66,10 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
                     .CountAsync(r => r.StudentId == studentId &&
                                     (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
 
-                IsFavorite = await _context.FavoriteBooks
-                    .AnyAsync(fb => fb.StudentId == studentId && fb.BookId == id.Value);
+                CurrentStudent = await _context.Users
+                    .Include(u => u.ClassesNavigation)
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Email == email);
 
                 IsRequested = await _context.BorrowRequests
                     .Include(r => r.Copy)
@@ -108,14 +102,18 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 
         public async Task<IActionResult> OnPostToggleFavoriteAsync(int bookId)
         {
-            if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
+            if (User.Identity?.IsAuthenticated != true || !User.IsInRole("Student"))
+            {
                 return NotFound();
+            }
 
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
             var student = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (student == null)
+            {
                 return NotFound();
+            }
 
             var favorite = await _context.FavoriteBooks
                 .FirstOrDefaultAsync(fb => fb.StudentId == student.UserId && fb.BookId == bookId);
@@ -135,7 +133,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
                 });
                 Message = "Đã thêm sách vào danh sách yêu thích";
             }
-            
+
             MessageType = "success";
             await _context.SaveChangesAsync();
             return RedirectToPage(new { id = bookId });
@@ -143,14 +141,18 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 
         public async Task<IActionResult> OnPostBorrowAsync(int copyId, int bookId, DateTime expectedReturnDate)
         {
-            if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
+            if (User.Identity?.IsAuthenticated != true || !User.IsInRole("Student"))
+            {
                 return NotFound();
+            }
 
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
             var student = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (student == null)
+            {
                 return NotFound();
+            }
 
             var studentId = student.UserId;
 
@@ -167,9 +169,10 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 
             var alreadyRequested = await _context.BorrowRequests
                 .Include(r => r.Copy)
-                .AnyAsync(r => r.StudentId == studentId
-                            && r.Copy != null && r.Copy.BookId == bookId
-                            && (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
+                .AnyAsync(r => r.StudentId == studentId &&
+                               r.Copy != null &&
+                               r.Copy.BookId == bookId &&
+                               (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
 
             if (alreadyRequested)
             {
@@ -190,10 +193,10 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 
             var request = new BorrowRequest
             {
-                StudentId   = studentId,
-                CopyId      = copyId,
+                StudentId = studentId,
+                CopyId = copyId,
                 RequestDate = DateTime.Now,
-                Status      = "Pending",
+                Status = "Pending",
                 ExpectedReturnDate = expectedReturnDate
             };
 

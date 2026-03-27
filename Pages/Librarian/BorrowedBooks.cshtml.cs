@@ -11,10 +11,12 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 public class BorrowedBooksModel : PageModel
 {
     private readonly ThuVienContext _context;
+    private readonly Services.NotificationService _notificationService;
 
-    public BorrowedBooksModel(ThuVienContext context)
+    public BorrowedBooksModel(ThuVienContext context, Services.NotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public string? ErrorMessage { get; set; }

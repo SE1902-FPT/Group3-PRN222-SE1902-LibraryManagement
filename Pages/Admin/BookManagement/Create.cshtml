@@ -1,0 +1,87 @@
+@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement.CreateModel
+
+@{
+    Layout = "_AdminLayout"; // Đồng bộ Sidebar
+    ViewData["Title"] = "Thêm sách mới";
+}
+
+<h2 class="text-primary">Thêm sách mới</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        @* Tăng độ rộng lên một chút cho dễ nhìn *@
+        <form method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.Title" class="control-label fw-bold">Tiêu đề</label>
+                <input asp-for="Book.Title" class="form-control" placeholder="Nhập tên sách..." />
+                <span asp-validation-for="Book.Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.Author" class="control-label fw-bold">Tác giả</label>
+                <input asp-for="Book.Author" class="form-control" />
+                <span asp-validation-for="Book.Author" class="text-danger"></span>
+            </div>
+
+            @* PHẦN DROPDOWN CATEGORY *@
+            <div class="form-group mb-3">
+                <label asp-for="Book.CategoryId" class="control-label fw-bold">Thể loại</label>
+                <select asp-for="Book.CategoryId" class="form-select" asp-items="ViewBag.CategoryId">
+                    <option value="">-- Chọn thể loại --</option>
+                </select>
+                <span asp-validation-for="Book.CategoryId" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="Book.Isbn" class="control-label fw-bold"></label>
+                    <input asp-for="Book.Isbn" class="form-control" />
+                    <span asp-validation-for="Book.Isbn" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="Book.PublishYear" class="control-label fw-bold">Năm XB</label>
+                    <input asp-for="Book.PublishYear" class="form-control" type="number" />
+                    <span asp-validation-for="Book.PublishYear" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.Publisher" class="control-label fw-bold">Nhà xuất bản</label>
+                <input asp-for="Book.Publisher" class="form-control" />
+                <span asp-validation-for="Book.Publisher" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label fw-bold">Chọn ảnh</label>
+                <input class="form-control" type="file" name="UploadImage" accept="image/*" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.Description" class="control-label fw-bold">Mô tả</label>
+                <textarea asp-for="Book.Description" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Book.Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="Book.TotalQuantity" class="control-label fw-bold">Số lượng</label>
+                <input asp-for="Book.TotalQuantity" class="form-control" type="number" />
+                <span asp-validation-for="Book.TotalQuantity" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-1"></i> Tạo mới</button>
+                <a asp-page="Index" class="btn btn-secondary ms-2">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

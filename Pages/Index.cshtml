@@ -1,8 +1,34 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = "Thư Viện Trường Học Vui Vẻ";
     Layout = null;
+
+    var defaultRecommendationCover = "https://images.unsplash.com/photo-1544648151-0738d38e67f7?auto=format&fit=crop&q=80&w=400";
+    var defaultFeaturedCover = "https://images.unsplash.com/photo-1543004629-142a2ccc5ef6?auto=format&fit=crop&q=80&w=400";
+
+    Func<string?, string, string> resolveBookImage = (rawUrl, fallbackUrl) =>
+    {
+        if (string.IsNullOrWhiteSpace(rawUrl))
+        {
+            return fallbackUrl;
+        }
+
+        var trimmed = rawUrl.Trim();
+
+        if (trimmed.Contains(":\\", StringComparison.Ordinal))
+        {
+            return fallbackUrl;
+        }
+
+        if (trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            return trimmed;
+        }
+
+        return trimmed.StartsWith("/") ? trimmed : "/" + trimmed;
+    };
 }
 
 <!DOCTYPE html>
@@ -200,10 +226,11 @@
                 @foreach (var rec in Model.Recommendations)
                 {
                     var available = rec.Book?.BookCopies?.Count(c => c.Status == "Available") ?? 0;
+                    var recommendationImage = resolveBookImage(rec.Book?.ImageUrl, defaultRecommendationCover);
                     <div class="bg-white p-4 rounded-xl-friendly book-card-shadow flex flex-col hover-pop">
                         <div class="relative aspect-[3/4] mb-4 overflow-hidden rounded-xl">
                             <span class="absolute top-2 left-2 z-10 bg-fresh-green text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Đề xuất</span>
-                            <img alt="Book cover" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1544648151-0738d38e67f7?auto=format&fit=crop&q=80&w=400" />
+                            <img alt="Book cover" class="w-full h-full object-cover" src="@recommendationImage" />
                         </div>
                         <h3 class="font-bold text-lg leading-tight mb-1">@rec.Book?.Title</h3>
                         <p class="text-gray-500 text-sm mb-1">@rec.Book?.Author</p>
@@ -232,9 +259,10 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 @foreach (var book in Model.FeaturedBooks)
                 {
+                    var featuredImage = resolveBookImage(book.ImageUrl, defaultFeaturedCover);
                     <div class="group cursor-pointer">
                         <div class="relative aspect-[2/3] bg-gray-200 rounded-xl overflow-hidden mb-3">
-                            <img alt="@book.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="https://images.unsplash.com/photo-1543004629-142a2ccc5ef6?auto=format&fit=crop&q=80&w=400" />
+                            <img alt="@book.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="@featuredImage" />
                         </div>
                         <h4 class="font-bold text-sm truncate">@book.Title</h4>
                         <p class="text-xs text-gray-500">@book.Author</p>

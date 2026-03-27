@@ -23,10 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Admin\CategoryManagement\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="wwwroot\Asset\" />
   </ItemGroup>
 

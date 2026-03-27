@@ -59,17 +59,23 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Books
 
             if (IsStudentView)
             {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                CurrentStudent = await _context.Users
+                    .Include(u => u.ClassesNavigation)
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Email == email);
+
+                if (CurrentStudent == null)
+                {
+                    return NotFound();
+                }
+
                 var studentId = CurrentStudent.UserId;
                 StudentClassName = CurrentStudent.ClassesNavigation.FirstOrDefault()?.ClassName ?? "N/A";
 
                 PendingCount = await _context.BorrowRequests
                     .CountAsync(r => r.StudentId == studentId &&
                                     (r.Status == "Pending" || r.Status == "Approved" || r.Status == "Borrowed"));
-
-                CurrentStudent = await _context.Users
-                    .Include(u => u.ClassesNavigation)
-                    .Include(u => u.Role)
-                    .FirstOrDefaultAsync(u => u.Email == email);
 
                 IsRequested = await _context.BorrowRequests
                     .Include(r => r.Copy)

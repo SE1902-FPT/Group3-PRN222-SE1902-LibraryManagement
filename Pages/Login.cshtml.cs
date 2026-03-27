@@ -97,7 +97,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                                     return RedirectToPage("/ParentDashboard");
 
                                 case "Student":
-                                    return RedirectToPage("/Student/Book");
+                                    return RedirectToPage("/index"); // Chuyển đến trang của Học sinh
 
                                 default:
                                     return RedirectToPage("/Index");

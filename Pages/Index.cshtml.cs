@@ -82,6 +82,8 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                 .OrderByDescending(b => b.BookId)
                 .Take(5)
                 .ToListAsync();
+
+            return Page();
         }
     }
 }

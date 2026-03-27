@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = "Thư Viện Trường Học Vui Vẻ";
@@ -255,6 +255,30 @@
         </section>
         <!-- END: Teacher Recommendations -->
 
+        <!-- BEGIN: Browse All Books -->
+        <section data-purpose="browse-all-books">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold">Thư viện sách 📖</h2>
+                    <p class="text-gray-500 mt-1">Xem toàn bộ sách và đăng ký mượn ngay</p>
+                </div>
+                <a href="/Student/Book" class="flex items-center gap-2 px-6 py-3 bg-sunny-yellow hover:bg-yellow-400 text-gray-800 font-bold rounded-xl-friendly transition-all hover:scale-105 shadow-md">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    Xem tất cả sách
+                </a>
+            </div>
+            <div class="bg-sunny-yellow/10 border-2 border-dashed border-sunny-yellow rounded-2xl-friendly p-10 text-center">
+                <div class="text-6xl mb-4">📚</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Khám phá kho sách của thư viện</h3>
+                <p class="text-gray-500 mb-6">Hàng trăm đầu sách thuộc nhiều thể loại đang chờ bạn — từ khoa học, văn học đến nghệ thuật!</p>
+                <a href="/Student/Book" class="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 hover:bg-gray-700 text-white font-bold rounded-xl-friendly transition-all hover:scale-105 shadow-lg">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    Vào trang mượn sách
+                </a>
+            </div>
+        </section>
+        <!-- END: Browse All Books -->
+
         <!-- BEGIN: New Books Grid -->
         <section data-purpose="new-arrivals">
             <div class="flex items-center gap-3 mb-8">
@@ -317,17 +341,33 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Notification bell
             const bell = document.getElementById('notification-btn');
-            const dropdown = document.getElementById('notification-dropdown');
+            const notifDropdown = document.getElementById('notification-dropdown');
 
             bell.addEventListener('click', function (e) {
                 e.stopPropagation();
-                dropdown.classList.toggle('hidden');
+                notifDropdown.classList.toggle('hidden');
+                profileDropdown.classList.add('hidden');
             });
 
+            // Profile dropdown
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+
+            profileBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+                notifDropdown.classList.add('hidden');
+            });
+
+            // Close both on outside click
             document.addEventListener('click', function (e) {
-                if (!bell.contains(e.target) && !dropdown.contains(e.target)) {
-                    dropdown.classList.add('hidden');
+                if (!bell.contains(e.target) && !notifDropdown.contains(e.target)) {
+                    notifDropdown.classList.add('hidden');
+                }
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
                 }
             });
         });

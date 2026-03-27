@@ -27,7 +27,7 @@
                     <th>Ngày mượn</th>
                     <th>Hạn trả</th>
                     <th>Trạng thái</th>
-                    <th>Thao tác</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,9 +58,13 @@
                                 <span class="badge bg-primary">@b.Status</span>
                             </td>
                             <td>
-                                <form method="post" asp-page-handler="Return" onsubmit="return confirm('Xác nhận học sinh đã trả sách này?');">
+                                <form method="post" asp-page-handler="Return" style="display:inline;">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="borrowId" value="@b.BorrowId" />
-                                    <button type="submit" class="btn btn-sm btn-success">Trả sách</button>
+                                    <button type="submit" class="btn btn-sm btn-success"
+                                            onclick="return confirm('Xác nhận học sinh đã trả sách?')">
+                                        Xác nhận trả
+                                    </button>
                                 </form>
                             </td>
                         </tr>

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 
@@ -62,6 +63,42 @@ public class BorrowedBooksModel : PageModel
         }
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostReturnAsync(int borrowId)
+    {
+        var record = await _context.BorrowRecords
+            .Include(b => b.Copy)
+            .FirstOrDefaultAsync(b => b.BorrowId == borrowId);
+
+        if (record == null)
+        {
+            ErrorMessage = "Không tìm thấy bản ghi mượn.";
+            await OnGetAsync();
+            return Page();
+        }
+
+        // 1. Đánh dấu BorrowRecord là đã trả
+        record.ReturnDate = DateTime.Now;
+        record.Status = "Returned";
+
+        // 2. Đổi BookCopy về Available
+        if (record.Copy != null)
+            record.Copy.Status = "Available";
+
+        // 3. Cập nhật BorrowRequest tương ứng sang Returned
+        var borrowRequest = await _context.BorrowRequests
+            .Where(r => r.StudentId == record.StudentId
+                     && r.CopyId == record.CopyId
+                     && (r.Status == "Borrowed" || r.Status == "Approved"))
+            .FirstOrDefaultAsync();
+
+        if (borrowRequest != null)
+            borrowRequest.Status = "Returned";
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToPage();
     }
 }
 

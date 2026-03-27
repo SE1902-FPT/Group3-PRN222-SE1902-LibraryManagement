@@ -115,7 +115,7 @@ public class BorrowRequestsModel : PageModel
             return Page();
         }
 
-        request.Status = "Approved";
+        request.Status = "Borrowed";
         request.ApprovedBy = LibrarianId;
 
         // Tạo record mượn mới

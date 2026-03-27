@@ -28,7 +28,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public string? LoggedInUserName { get; set; }
         public string? LoggedInUserRole { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             IsAuthenticated = User.Identity?.IsAuthenticated ?? false;
 

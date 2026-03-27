@@ -27,14 +27,14 @@
                     <th>Ngày mượn</th>
                     <th>Hạn trả</th>
                     <th>Trạng thái</th>
-                    <th>Hành động</th>
+                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
                 @if (Model.CurrentBorrowRecords.Count == 0)
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-muted">Chưa có ai đang mượn.</td>
+                        <td colspan="8" class="text-center text-muted">Chưa có ai đang mượn.</td>
                     </tr>
                 }
                 else
@@ -58,13 +58,10 @@
                                 <span class="badge bg-primary">@b.Status</span>
                             </td>
                             <td>
-                                <form method="post" asp-page-handler="Return" style="display:inline;">
+                                <form method="post" asp-page-handler="Return" onsubmit="return confirm('Xác nhận học sinh đã trả sách này?');">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="borrowId" value="@b.BorrowId" />
-                                    <button type="submit" class="btn btn-sm btn-success"
-                                            onclick="return confirm('Xác nhận học sinh đã trả sách?')">
-                                        Xác nhận trả
-                                    </button>
+                                    <button type="submit" class="btn btn-sm btn-success">Trả sách</button>
                                 </form>
                             </td>
                         </tr>
@@ -74,4 +71,3 @@
         </table>
     </div>
 </div>
-

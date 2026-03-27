@@ -86,6 +86,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                             {
                                 case "Admin":
                                     return RedirectToPage("/Admin/Index");
+                                    return RedirectToPage("/Admin"); // Chuyển đến trang của Quản trị viên
 
                                 case "Librarian":
                                     return RedirectToPage("/Librarian/Libralian_Dashboard");

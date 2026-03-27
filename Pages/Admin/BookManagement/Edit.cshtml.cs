@@ -36,7 +36,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement
             }
             Book = book;
 
-            // Nạp danh sách Category và chọn sẵn ID hiện tại của sách
             ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", book.CategoryId);
             return Page();
         }

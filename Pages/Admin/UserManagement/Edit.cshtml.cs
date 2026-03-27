@@ -45,7 +45,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
         {
             if (id == null) return NotFound();
 
-            // Load dữ liệu với AsNoTracking để tránh xung đột khi Save sau này
             User = await _context.Users
                 .Include(u => u.Role)
                 .Include(u => u.Classes)
@@ -55,7 +54,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
 
             if (User == null) return NotFound();
 
-            // Nạp thông tin phụ huynh nếu có
+            //Infor phụ huynh
             var link = await _context.ParentStudents.AsNoTracking().FirstOrDefaultAsync(ps => ps.ParentId == id);
             if (link != null)
             {
@@ -65,7 +64,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
                 ParentAddress = link.Address;
             }
 
-            // Nạp ID lớp hiện tại
+            //Class id
             if (User.Role?.RoleName == "Teacher")
                 SelectedClassId = User.Classes.FirstOrDefault()?.ClassId;
             else if (User.Role?.RoleName == "Student")
@@ -109,7 +108,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
 
             try
             {
-                // Cập nhật thông tin cơ bản
                 userToUpdate.FullName = User.FullName;
                 userToUpdate.Email = User.Email;
                 userToUpdate.RoleId = User.RoleId;

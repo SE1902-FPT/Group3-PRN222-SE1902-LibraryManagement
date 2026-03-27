@@ -31,22 +31,20 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.UserManagement
 
         public async Task OnGetAsync()
         {
-            // 1. Nạp danh sách Role để filter
             RoleList = new SelectList(await _context.Roles.ToListAsync(), "RoleId", "RoleName");
 
-            // 2. Query cơ bản kèm Include Role
             var userQuery = _context.Users
                 .Include(u => u.Role)
                 .AsQueryable();
 
-            // 3. Search theo FullName hoặc Email
+            // search
             if (!string.IsNullOrEmpty(SearchString))
             {
                 userQuery = userQuery.Where(u => u.FullName.Contains(SearchString)
                                               || u.Email.Contains(SearchString));
             }
 
-            // 4. Filter theo RoleId
+            // filter
             if (RoleFilter.HasValue)
             {
                 userQuery = userQuery.Where(u => u.RoleId == RoleFilter.Value);

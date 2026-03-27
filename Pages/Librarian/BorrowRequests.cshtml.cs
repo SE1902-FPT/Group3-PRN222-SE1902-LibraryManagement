@@ -12,10 +12,12 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 public class BorrowRequestsModel : PageModel
 {
     private readonly ThuVienContext _context;
+    private readonly Services.NotificationService _notificationService;
 
-    public BorrowRequestsModel(ThuVienContext context)
+    public BorrowRequestsModel(ThuVienContext context, Services.NotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public int? LibrarianId { get; set; }
@@ -144,6 +146,12 @@ public class BorrowRequestsModel : PageModel
         _context.BorrowRecords.Add(borrowRecord);
         await _context.SaveChangesAsync();
         await tx.CommitAsync();
+
+        // Gửi thông báo realtime cho phụ huynh
+        if (request.StudentId.HasValue && request.Copy?.Book?.Title != null)
+        {
+            await _notificationService.SendBorrowAsync(request.StudentId.Value, request.Copy.Book.Title, dueDate);
+        }
 
         ToastType = "success";
         ToastMessage = "Yêu cầu mượn sách đã được duyệt.";

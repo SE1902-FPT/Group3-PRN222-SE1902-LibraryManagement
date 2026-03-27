@@ -93,15 +93,10 @@
             </form>
 
             <div class="flex items-center gap-3">
-                @if (Model.IsAuthenticated)
-                {
-                    <a class="px-4 py-2 text-sm font-semibold rounded-full border border-red-100 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 transition" href="/Logout">Đăng xuất</a>
-                }
-                else
+                @if (!Model.IsAuthenticated)
                 {
                     <a class="px-4 py-2 text-sm font-semibold rounded-full border border-soft-blue bg-white text-soft-blue hover:bg-soft-blue hover:text-white transition" href="/Login">Đăng nhập</a>
                 }
-
                 <div class="relative" id="profile-wrapper">
                     <button id="profile-btn" class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 hover:border-sunny-yellow transition-colors">
                         <div class="text-right hidden sm:block">

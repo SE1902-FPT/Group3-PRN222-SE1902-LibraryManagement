@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Group3_SE1902_PRN222_LibraryManagement.Models;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages
@@ -23,19 +24,36 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public List<Book> FeaturedBooks { get; set; } = new();
         public string? UserClassName { get; set; }
 
-        public async Task<IActionResult> OnGetAsync()
+        public bool IsAuthenticated { get; set; }
+        public string? LoggedInUserName { get; set; }
+        public string? LoggedInUserRole { get; set; }
+
+        public async Task OnGetAsync()
         {
-            // Chỉ Student mới được vào Homepage
-            if (!User.Identity.IsAuthenticated || !User.IsInRole("Student"))
+            IsAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+            if (IsAuthenticated)
             {
-                return RedirectToPage("/Login");
+                LoggedInUserName = User.FindFirst(ClaimTypes.Name)?.Value;
+                LoggedInUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                // Try to find the authenticated user in the database
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+                if (!string.IsNullOrEmpty(email))
+                {
+                    CurrentUser = await _context.Users
+                        .Include(u => u.ClassesNavigation)
+                        .FirstOrDefaultAsync(u => u.Email == email);
+                }
             }
 
-            // Lấy user từ email trong Cookie Claims
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            CurrentUser = await _context.Users
-                .Include(u => u.ClassesNavigation)
-                .FirstOrDefaultAsync(u => u.Email == email);
+            // Fallback: fetch first student for demo purposes if no authenticated user found
+            if (CurrentUser == null)
+            {
+                CurrentUser = await _context.Users
+                    .Include(u => u.ClassesNavigation)
+                    .FirstOrDefaultAsync(u => u.RoleId == 3);
+            }
 
             if (CurrentUser != null)
             {

@@ -85,7 +85,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                             switch (roleName)
                             {
                                 case "Admin":
-                                    return RedirectToPage("/Admin"); // Chuyển đến trang của Quản trị viên
+                                    return RedirectToPage("/Admin/Index"); // Chuyển đến trang của Quản trị viên
 
                                 case "Librarian":
                                     return RedirectToPage("/Librarian/Libralian_Dashboard");

@@ -1,0 +1,85 @@
+﻿@page
+@model Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement.EditModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Chỉnh sửa sách";
+}
+
+<h2 class="text-primary">Chỉnh sửa thông tin sách</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Book.BookId" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.Title" class="control-label fw-bold">Tiêu đề</label>
+                <input asp-for="Book.Title" class="form-control" />
+                <span asp-validation-for="Book.Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.Author" class="control-label fw-bold">Tác giả</label>
+                <input asp-for="Book.Author" class="form-control" />
+                <span asp-validation-for="Book.Author" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.CategoryId" class="control-label fw-bold">Thể loại</label>
+                <select asp-for="Book.CategoryId" class="form-select" asp-items="ViewBag.CategoryId"></select>
+                <span asp-validation-for="Book.CategoryId" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Book.Isbn" class="control-label fw-bold"></label>
+                    <input asp-for="Book.Isbn" class="form-control" />
+                    <span asp-validation-for="Book.Isbn" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Book.PublishYear" class="control-label fw-bold">Năm XB</label>
+                    <input asp-for="Book.PublishYear" class="form-control" />
+                    <span asp-validation-for="Book.PublishYear" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.Publisher" class="control-label fw-bold">Nhà xuất bản</label>
+                <input asp-for="Book.Publisher" class="form-control" />
+                <span asp-validation-for="Book.Publisher" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.ImageUrl" class="control-label fw-bold">Link ảnh bìa</label>
+                <input asp-for="Book.ImageUrl" class="form-control" />
+                <span asp-validation-for="Book.ImageUrl" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Book.Description" class="control-label fw-bold">Mô tả</label>
+                <textarea asp-for="Book.Description" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Book.Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="Book.TotalQuantity" class="control-label fw-bold">Số lượng</label>
+                <input asp-for="Book.TotalQuantity" class="form-control" />
+                <span asp-validation-for="Book.TotalQuantity" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-success px-4">Lưu thay đổi</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

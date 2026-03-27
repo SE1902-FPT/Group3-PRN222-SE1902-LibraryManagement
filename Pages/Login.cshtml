@@ -1,28 +1,104 @@
-﻿@page
+@page
 @model Group3_SE1902_PRN222_LibraryManagement.Pages.LoginModel
 @{
     ViewData["Title"] = "Đăng nhập";
+    Layout = null;
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <h3 class="text-center">Đăng nhập hệ thống</h3>
-
-        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-        {
-            <div class="alert alert-danger">@Model.ErrorMessage</div>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Library Management</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 45%, #ffffff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        <form method="post">
-            <div class="mb-3">
-                <label>Email:</label>
-                <input type="email" asp-for="Email" class="form-control" required />
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 16px;
+        }
+
+        .login-card {
+            border: 0;
+            border-radius: 18px;
+            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            margin: 6px 0 0;
+            opacity: 0.95;
+            font-size: 0.92rem;
+        }
+
+        .login-body {
+            padding: 22px;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .btn-login {
+            border-radius: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="card login-card">
+            <div class="login-header">
+                <h1>Chào mừng đến thư viện</h1>
+                
             </div>
-            <div class="mb-3">
-                <label>Mật khẩu:</label>
-                <input type="password" asp-for="Password" class="form-control" required />
+            <div class="login-body">
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger py-2">@Model.ErrorMessage</div>
+                }
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" asp-for="Email" class="form-control" placeholder="Nhap email..." required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mat khau</label>
+                        <input type="password" asp-for="Password" class="form-control" placeholder="Nhap mat khau..." required />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-login w-100">Dang nhap</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
-        </form>
+        </div>
     </div>
-</div>
+</body>
+</html>

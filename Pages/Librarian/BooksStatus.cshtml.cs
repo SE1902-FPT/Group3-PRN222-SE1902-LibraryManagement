@@ -23,9 +23,14 @@ public class BooksStatusModel : PageModel
 
     public class BookStatusRow
     {
+        public int BookId { get; set; }
+        public string? ImageUrl { get; set; }
         public string Title { get; set; } = "-";
         public string? CategoryName { get; set; }
         public string? Author { get; set; }
+        public string? Isbn { get; set; }
+        public string? Publisher { get; set; }
+        public int? PublishYear { get; set; }
         public int AvailableCount { get; set; }
         public int BorrowedCount { get; set; }
         public int TotalCount { get; set; }
@@ -53,9 +58,14 @@ public class BooksStatusModel : PageModel
                 .OrderByDescending(b => b.BookId)
                 .Select(b => new BookStatusRow
                 {
+                    BookId = b.BookId,
+                    ImageUrl = b.ImageUrl,
                     Title = b.Title,
                     CategoryName = b.Category != null ? b.Category.CategoryName : null,
                     Author = b.Author,
+                    Isbn = b.Isbn,
+                    Publisher = b.Publisher,
+                    PublishYear = b.PublishYear,
                     AvailableCount = b.BookCopies.Count(c => c.Status == "Available"),
                     BorrowedCount = b.BookCopies.Count(c => c.Status == "Borrowed"),
                     TotalCount = b.BookCopies.Count

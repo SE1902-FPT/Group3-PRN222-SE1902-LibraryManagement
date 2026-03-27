@@ -18,7 +18,7 @@
     else
     {
         <p class="text-muted">
-            Thủ thư hiện tại: <strong>@Model.LibrarianName</strong> 
+            Thủ thư hiện tại: <strong>@Model.LibrarianName</strong>
         </p>
     }
 
@@ -42,6 +42,7 @@
                 <table class="table table-sm table-striped align-middle">
                     <thead>
                         <tr>
+                            <th style="width: 76px;">Ảnh</th>
                             <th>Tên sách</th>
                             <th>Thể loại</th>
                             <th>Tác giả</th>
@@ -53,6 +54,24 @@
                         @foreach (var b in Model.Books)
                         {
                             <tr>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(b.ImageUrl))
+                                    {
+                                        <img src="@b.ImageUrl"
+                                             alt="@b.Title"
+                                             style="width: 56px; height: 72px; object-fit: cover; border-radius: 6px;"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                        <div style="width:56px;height:72px;display:none;align-items:center;justify-content:center;border:1px dashed #ccc;border-radius:6px;color:#999;font-size:12px;">
+                                            No image
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div style="width:56px;height:72px;display:flex;align-items:center;justify-content:center;border:1px dashed #ccc;border-radius:6px;color:#999;font-size:12px;">
+                                            No image
+                                        </div>
+                                    }
+                                </td>
                                 <td class="fw-semibold">@b.Title</td>
                                 <td>@b.CategoryName</td>
                                 <td>@b.Author</td>

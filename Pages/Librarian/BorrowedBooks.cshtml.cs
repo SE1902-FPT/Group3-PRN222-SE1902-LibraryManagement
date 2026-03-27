@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 
@@ -10,10 +11,12 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages.Librarian;
 public class BorrowedBooksModel : PageModel
 {
     private readonly ThuVienContext _context;
+    private readonly Services.NotificationService _notificationService;
 
-    public BorrowedBooksModel(ThuVienContext context)
+    public BorrowedBooksModel(ThuVienContext context, Services.NotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public string? ErrorMessage { get; set; }
@@ -62,6 +65,46 @@ public class BorrowedBooksModel : PageModel
         }
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostReturnAsync(int borrowId)
+    {
+        var record = await _context.BorrowRecords
+            .Include(b => b.Copy)
+                .ThenInclude(c => c.Book)
+            .FirstOrDefaultAsync(b => b.BorrowId == borrowId);
+
+        if (record != null && record.ReturnDate == null)
+        {
+            record.ReturnDate = DateTime.Now;
+            record.Status = "Returned";
+            
+            if (record.Copy != null)
+            {
+                record.Copy.Status = "Available";
+            }
+
+            // Ghi nhận người trả (thủ thư hiện tại)
+            var email = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+            if (!string.IsNullOrEmpty(email))
+            {
+                var librarian = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (librarian != null)
+                {
+                    record.ProcessedBy = librarian.UserId;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Gửi thông báo realtime cho phụ huynh
+            if (record.StudentId.HasValue && record.Copy?.Book?.Title != null)
+            {
+                await _notificationService.SendReturnAsync(record.StudentId.Value, record.Copy.Book.Title);
+            }
+        }
+
+        return RedirectToPage();
     }
 }
 

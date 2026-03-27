@@ -18,7 +18,7 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
         public string ErrorMessage { get; set; }
 
         // Chuỗi kết nối Database của bạn
-        private readonly string connectionString = @"Server=localhost;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
+        private readonly string connectionString = @"Server=.;database=Thu_vien;uid=sa;pwd=123;TrustServerCertificate=True;";
 
         public void OnGet()
         {
@@ -85,7 +85,6 @@ namespace Group3_SE1902_PRN222_LibraryManagement.Pages
                             switch (roleName)
                             {
                                 case "Admin":
-                                    return RedirectToPage("/Admin/Index");
                                     return RedirectToPage("/Admin"); // Chuyển đến trang của Quản trị viên
 
                                 case "Librarian":

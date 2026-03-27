@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model Group3_SE1902_PRN222_LibraryManagement.Pages.Admin.BookManagement.CreateModel
 
 @{
@@ -12,7 +12,7 @@
 <div class="row">
     <div class="col-md-6">
         @* Tăng độ rộng lên một chút cho dễ nhìn *@
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group mb-3">
@@ -56,9 +56,8 @@
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="Book.ImageUrl" class="control-label fw-bold">Link ảnh bìa</label>
-                <input asp-for="Book.ImageUrl" class="form-control" />
-                <span asp-validation-for="Book.ImageUrl" class="text-danger"></span>
+                <label class="control-label fw-bold">Chọn ảnh</label>
+                <input class="form-control" type="file" name="UploadImage" accept="image/*" />
             </div>
 
             <div class="form-group mb-3">
